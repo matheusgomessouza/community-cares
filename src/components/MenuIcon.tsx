@@ -4,12 +4,12 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import UsabilityContext from "../contexts/usability";
 
 export default function MenuIconComponent() {
-  const { setShowMenu } = useContext(UsabilityContext);
+  const { showMenu, setShowMenu } = useContext(UsabilityContext);
 
   return (
     <TouchableOpacity
       style={styles.buttonContainer}
-      onPress={() => setShowMenu(true)}
+      onPress={() => setShowMenu(!showMenu)}
     >
       <Icon name="menu" color="orange" size={32} />
     </TouchableOpacity>
