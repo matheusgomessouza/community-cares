@@ -4,5 +4,14 @@ export interface UsabilityContextProps {
 }
 
 export type UsabilityProviderProps = {
-  children: React.ReactNode
+  children: React.ReactNode;
+};
+
+export interface AuthenticationContextProps {
+  isUserAuthenticated: boolean;
+  setIsUserAuthenticated(value: boolean): void;
+}
+
+export interface AuthenticationProviderProps {
+  children: React.ReactNode;
 }
