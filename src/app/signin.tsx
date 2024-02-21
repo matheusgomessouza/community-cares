@@ -1,8 +1,7 @@
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-import Logo from "../../assets/logo.svg";
+import BackgroundImage from "../../assets/background-login-fix.svg";
 import { useContext, useEffect } from "react";
 import AuthenticationContext from "../contexts/authentication";
 import * as WebBrowser from "expo-web-browser";
@@ -36,23 +35,19 @@ export default function SignInScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-      console.log(code ,request, response)
+      console.log(code, request, response);
       setIsUserAuthenticated(true);
     }
   }, [response]);
 
   return (
-    <LinearGradient
-      colors={["#EB841A", "#E69B00", "#FFFF"]}
-      style={styles.linearGradient}
-    >
-      <SafeAreaView style={styles.container}>
-        <Logo style={styles.logo} width={285} height={265} />
-        <Text style={styles.brandName}>Community Cares</Text>
-        {/* <TouchableOpacity style={styles.signInButton}>
+    <View style={styles.container}>
+      <BackgroundImage width={"100%"} height={"100%"} />
+      <View style={styles.signInContainer}>
+        <TouchableOpacity style={styles.signInButton}>
           <Text style={styles.textSignButton}>Google</Text>
           <Icon name="google" size={16} color="#FFFF" />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <TouchableOpacity
           disabled={!request}
           style={styles.signInButton}
@@ -61,22 +56,17 @@ export default function SignInScreen() {
           <Text style={styles.textSignButton}>Github</Text>
           <Icon name="github" size={16} color="#FFFF" />
         </TouchableOpacity>
-      </SafeAreaView>
-    </LinearGradient>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  linearGradient: {
-    flex: 1,
-    padding: 24,
-    paddingTop: 64,
-  },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-end",
-    padding: 16,
+    zIndex: 2,
   },
   logo: {
     marginBottom: 16,
@@ -86,6 +76,11 @@ const styles = StyleSheet.create({
     fontFamily: "Shrikhand_400Regular",
     color: "#FFFF",
     marginBottom: "auto",
+  },
+  signInContainer: {
+    position: "absolute",
+    bottom: 16,
+    zIndex: 3
   },
   signInButton: {
     backgroundColor: "#EB841A",
