@@ -24,7 +24,7 @@ Community Cares is an app that helps people find free giveaway food locations to
 - Clone o repositório / Clone the repository 
 
 - Instale as dependências com `npm i` / Install the dependencies with `npm i`
-- Inicie o servidor com `npex expo start --clear` / Start the server with `npex expo start --clear`
+- Inicie o servidor com `npx expo start --clear` / Start the server with `npx expo start --clear`
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
