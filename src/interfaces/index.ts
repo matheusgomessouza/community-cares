@@ -15,3 +15,15 @@ export interface AuthenticationContextProps {
 export interface AuthenticationProviderProps {
   children: React.ReactNode;
 }
+
+export interface ErrorGithubResponseProps {
+  error: string;
+  error_description: string;
+  error_uri: string;
+}
+
+export interface SuccessGithubResponseProps {
+  access_token: string;
+  scope: string;
+  token_type: string;
+}
