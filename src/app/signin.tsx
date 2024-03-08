@@ -1,13 +1,13 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import * as SecureStore from "expo-secure-store";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 import * as interfaces from "../interfaces/";
 import BackgroundImage from "../../assets/background-login-fix.svg";
-import AuthenticationContext from "../contexts/authentication";
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
@@ -18,7 +18,6 @@ const discovery = {
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SignInScreen() {
-  const { setIsUserAuthenticated } = useContext(AuthenticationContext);
   const [githubTokenData, setGithubTokenData] =
     useState<interfaces.SuccessGithubResponseProps>(
       {} as interfaces.SuccessGithubResponseProps
@@ -54,10 +53,13 @@ export default function SignInScreen() {
 
       setGithubTokenData(response.data);
 
-      if (response.status === 200 && githubTokenData.access_token !== undefined) {
-        setIsUserAuthenticated(true);
+      if (
+        response.status === 200 &&
+        githubTokenData.access_token !== undefined
+      ) {
+        await SecureStore.setItemAsync("github-token", githubTokenData.access_token);
       } else {
-        setIsUserAuthenticated(false);
+        return
       }
     } catch (error) {
       console.error("Unable to perform code exchange", error);

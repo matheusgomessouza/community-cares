@@ -1,6 +1,6 @@
 export interface UsabilityContextProps {
-  showMenu: boolean;
-  setShowMenu: (value: boolean) => void;
+  showFilter: boolean;
+  setShowFilter: (value: boolean) => void;
 }
 
 export type UsabilityProviderProps = {

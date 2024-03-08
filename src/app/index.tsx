@@ -1,10 +1,25 @@
-import { useContext } from "react";
+import { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+
 import SignInPage from "./signin";
-import AuthenticationContext from "contexts/authentication";
 import MapScreen from "./map";
+import ProfileScreen from "./profile";
 
 export default function App() {
-  const {isUserAuthenticated} = useContext(AuthenticationContext);
+  const [hasAuthToken, setHasAuthToken] = useState<boolean>(false);
 
-  return isUserAuthenticated ? <MapScreen/> : <SignInPage />;
+  async function getStorageToken() {
+    try {
+      const response = await SecureStore.getItemAsync("github-token");
+      if (response) setHasAuthToken(true);
+    } catch (error) {
+      console.error("Unable to retrieve SecureStorage data", error);
+    }
+  }
+
+  useEffect(() => {
+    getStorageToken();
+  }, []);
+
+  return hasAuthToken ? <MapScreen /> : <SignInPage />;
 }

@@ -28,6 +28,7 @@ export default function App() {
         >
           <Stack.Screen name="signin" />
           <Stack.Screen name="map" />
+          <Stack.Screen name="profile" />
         </Stack>
       </UsabilityProvider>
     </AuthenticationProvider>

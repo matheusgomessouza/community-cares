@@ -6,20 +6,20 @@ const UsabilityContext = createContext<interfaces.UsabilityContextProps>(
 );
 
 export function UsabilityProvider({
-  children
+  children,
 }: interfaces.UsabilityProviderProps) {
-  const [showMenu, setShowMenu] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
 
   return (
     <UsabilityContext.Provider
       value={{
-        showMenu,
-        setShowMenu
+        showFilter,
+        setShowFilter
       }}
     >
       {children}
     </UsabilityContext.Provider>
-  )
+  );
 }
 
 export default UsabilityContext;
