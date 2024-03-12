@@ -3,17 +3,15 @@ import * as SecureStore from "expo-secure-store";
 
 import SignInPage from "./signin";
 import MapScreen from "./map";
-import ProfileScreen from "./profile";
 
 export default function App() {
-  const [hasAuthToken, setHasAuthToken] = useState<boolean>(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   async function getStorageToken() {
-    try {
-      const response = await SecureStore.getItemAsync("github-token");
-      if (response) setHasAuthToken(true);
-    } catch (error) {
-      console.error("Unable to retrieve SecureStorage data", error);
+    const token = await SecureStore.getItemAsync("github-token");
+
+    if (token) {
+      setAuthToken(token);
     }
   }
 
@@ -21,5 +19,5 @@ export default function App() {
     getStorageToken();
   }, []);
 
-  return hasAuthToken ? <MapScreen /> : <SignInPage />;
+  return authToken ? <MapScreen /> : <SignInPage />;
 }

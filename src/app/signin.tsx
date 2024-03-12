@@ -57,10 +57,11 @@ export default function SignInScreen() {
         response.status === 200 &&
         githubTokenData.access_token !== undefined
       ) {
-        await SecureStore.setItemAsync("github-token", githubTokenData.access_token);
-      } else {
-        return
-      }
+        await SecureStore.setItemAsync(
+          "github-token",
+          githubTokenData.access_token
+        );
+      } 
     } catch (error) {
       console.error("Unable to perform code exchange", error);
     }

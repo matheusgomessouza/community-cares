@@ -37,6 +37,7 @@ export default function MenuOverlayComponent() {
       </View>
       {filterOptions.map((item) => (
         <View
+          key={item.title}
           style={{
             flexDirection: "row",
             gap: 8,
@@ -48,11 +49,14 @@ export default function MenuOverlayComponent() {
             onValueChange={setChecked}
             color={isChecked ? "orange" : undefined}
           />
-          <Text style={{
-            color: "white",
-            fontFamily: "Montserrat_400Regular",
-            
-          }}>{item.title}</Text>
+          <Text
+            style={{
+              color: "white",
+              fontFamily: "Montserrat_400Regular",
+            }}
+          >
+            {item.title}
+          </Text>
         </View>
       ))}
       <TouchableOpacity style={styles.searchButtonContainer}>
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 8,
     marginTop: 48,
-    marginBottom: 16
+    marginBottom: 16,
   },
   headerLabel: {
     color: "#ffff",

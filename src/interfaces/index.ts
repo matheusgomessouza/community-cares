@@ -27,3 +27,11 @@ export interface SuccessGithubResponseProps {
   scope: string;
   token_type: string;
 }
+
+export interface UserDataProps {
+  name: string;
+  avatar_url: string;
+  bio: string;
+  email?: string;
+  location: string;
+}
