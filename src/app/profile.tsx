@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import IconF from "react-native-vector-icons/FontAwesome";
 import { getUserData } from "services/github";
 import * as interfaces from "../interfaces";
 
@@ -36,7 +37,7 @@ export default function ProfileScreen() {
             router.navigate("map");
           }}
         />
-        <Icon name="menu" size={24} color="#EB841A" onPress={() => {}} />
+        <IconF name="gear" size={24} color="#EB841A" onPress={() => {}} />
       </View>
       <View style={styles.profileInfo}>
         <View style={styles.profileHeadlineContainer}>

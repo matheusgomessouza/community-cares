@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
     width: "50%",
     borderRadius: 10,
     marginTop: "auto",
+    marginBottom: 24,
     alignSelf: "center",
   },
   searchButtonText: {
