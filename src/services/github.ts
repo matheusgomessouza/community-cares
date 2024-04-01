@@ -11,20 +11,30 @@ const instance = axios.create({
   },
 });
 
-export async function getUserData(): Promise<
-  interfaces.UserDataProps | undefined
-> {
+export async function getUserData(
+  access?: string
+): Promise<interfaces.UserDataProps | undefined> {
   try {
-    const token = await SecureStore.getItemAsync("github-token");
-
-    if (token) {
+    if (access) {
       const response = await instance.get("/user", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${access}`,
         },
       });
-      
+      console.log(response.data);
       return response.data;
+    } else {
+      const token = await SecureStore.getItemAsync("github-token");
+
+      if (token) {
+        const response = await instance.get("/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        return response.data;
+      }
     }
   } catch (error) {
     console.error("Unable to retrieve user data [getUserData]", error);

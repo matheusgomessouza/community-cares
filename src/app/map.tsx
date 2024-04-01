@@ -1,25 +1,44 @@
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import MapView from "react-native-maps";
+import * as Location from "expo-location";
 import { useContext, useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import MapView from "react-native-maps";
-import { router } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../../src/components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
 import { getUserData } from "services/github";
 import * as interfaces from "../interfaces";
-import { Image } from "expo-image";
 
-export default function MapScreen() {
+type MapScreenProps = {
+  access?: string
+}
+
+export default function MapScreen({ access }: MapScreenProps) {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
-
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
+  const [errorMsg, setErrorMsg] = useState<null | string>(null);
+  const [location, setLocation] = useState<null | Location.LocationObject>(
+    null
+  );
+  
+  const circumference = (40075 / 360) * 1000;
+  const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
+  let latDelta;
+  let lonDelta;
+
+  if (location?.coords.accuracy) {
+    latDelta =
+      location?.coords.accuracy *
+      (1 / (Math.cos(location?.coords.latitude) * circumference));
+    lonDelta = location?.coords.accuracy / oneDegreeOfLongitudeInMeters;
+  }
 
   useEffect(() => {
-    const response = getUserData();
-
+    const response = getUserData(access);
     response
       .then((res: interfaces.UserDataProps | undefined) => {
         setProfileInfo(res);
@@ -27,11 +46,27 @@ export default function MapScreen() {
       .catch((err: unknown) => {
         console.error("Failed to retrieve profile data", err);
       });
+
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
       {showFilter && <MenuOverlayComponent />}
+      {typeof errorMsg === "string" && (
+        <View>
+          <Text>{errorMsg}</Text>
+        </View>
+      )}
       <View style={styles.navigationComponent}>
         <Icon
           name=""
@@ -65,7 +100,15 @@ export default function MapScreen() {
           style={styles.navigationButton}
         />
       </View>
-      <MapView style={styles.map} />
+      <MapView
+        initialRegion={{
+          latitude: location?.coords.latitude ?? 37.78825,
+          longitude: location?.coords.longitude ?? -122.4324,
+          latitudeDelta: latDelta ?? 0.0922,
+          longitudeDelta: lonDelta ?? 0.421,
+        }}
+        style={styles.map}
+      />
     </View>
   );
 }

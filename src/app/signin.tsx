@@ -1,10 +1,17 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import Icon from "react-native-vector-icons/FontAwesome";
+import IconMaterial from "react-native-vector-icons/MaterialIcons";
 
 import * as interfaces from "../interfaces/";
 import BackgroundImage from "../../assets/background-login-fix.svg";
@@ -22,6 +29,7 @@ export default function SignInScreen() {
     useState<interfaces.SuccessGithubResponseProps>(
       {} as interfaces.SuccessGithubResponseProps
     );
+  const [showSignInError, setShowSignInError] = useState<boolean>(false);
 
   const [request, response, signInWithGithub] = useAuthRequest(
     {
@@ -55,15 +63,16 @@ export default function SignInScreen() {
 
       if (
         response.status === 200 &&
-        githubTokenData.access_token !== undefined
+        Object.hasOwn(githubTokenData, "access_token")
       ) {
         await SecureStore.setItemAsync(
           "github-token",
           githubTokenData.access_token
         );
-      } 
+      }
     } catch (error) {
       console.error("Unable to perform code exchange", error);
+      setShowSignInError(true);
     }
   }
 
@@ -73,26 +82,46 @@ export default function SignInScreen() {
 
       codeExchange(code);
     }
-  }, [response]);
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <BackgroundImage width={"100%"} height={"100%"} />
-      <View style={styles.signInContainer}>
-        <TouchableOpacity style={styles.signInButton}>
-          <Text style={styles.textSignButton}>Google</Text>
-          <Icon name="google" size={16} color="#FFFF" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          disabled={!request}
-          style={styles.signInButton}
-          onPress={() => signInWithGithub()}
-        >
-          <Text style={styles.textSignButton}>Github</Text>
-          <Icon name="github" size={16} color="#FFFF" />
-        </TouchableOpacity>
+    <>
+      {showSignInError && (
+        <View style={styles.errorModalOverlay}>
+          <View style={styles.errorModal}>
+            <IconMaterial name="error" size={32} color="#EB841A" />
+            <Text style={styles.errorModalText}>
+              Unable to sign in, try again.
+            </Text>
+            <Pressable
+              onPress={() => setShowSignInError(false)}
+              style={{
+                marginLeft: "auto",
+              }}
+            >
+              <Text style={styles.errorModalConfirmButton}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+      <View style={styles.container}>
+        <BackgroundImage width={"100%"} height={"100%"} />
+        <View style={styles.signInContainer}>
+          {/* <TouchableOpacity style={styles.signInButton}>
+            <Text style={styles.textSignButton}>Google</Text>
+            <Icon name="google" size={16} color="#FFFF" />
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            disabled={!request}
+            style={styles.signInButton}
+            onPress={() => signInWithGithub()}
+          >
+            <Text style={styles.textSignButton}>Github</Text>
+            <Icon name="github" size={16} color="#FFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -132,5 +161,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Montserrat_700Bold",
     marginRight: 8,
+  },
+  errorModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    position: "absolute",
+    zIndex: 4,
+    width: "100%",
+    height: "100%",
+  },
+  errorModal: {
+    borderRadius: 20,
+    zIndex: 5,
+    position: "absolute",
+    bottom: "45%",
+    left: "25%",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 24,
+    backgroundColor: "#FFFF",
+    padding: 16,
+    height: 150,
+    width: "50%",
+  },
+  errorModalText: {
+    fontFamily: "Montserrat_400Regular",
+    color: "#9F9B9B",
+    fontSize: 12,
+  },
+  errorModalConfirmButton: {
+    fontFamily: "Montserrat_700Bold",
+    color: "#EB841A",
   },
 });
