@@ -6,16 +6,12 @@ import { useContext, useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-import MenuOverlayComponent from "../../src/components/MenuOverlay";
+import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
 import { getUserData } from "services/github";
 import * as interfaces from "../interfaces";
 
-type MapScreenProps = {
-  access?: string
-}
-
-export default function MapScreen({ access }: MapScreenProps) {
+export default function MapScreen() {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
@@ -24,7 +20,7 @@ export default function MapScreen({ access }: MapScreenProps) {
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-  
+
   const circumference = (40075 / 360) * 1000;
   const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
   let latDelta;
@@ -38,14 +34,15 @@ export default function MapScreen({ access }: MapScreenProps) {
   }
 
   useEffect(() => {
-    const response = getUserData(access);
-    response
-      .then((res: interfaces.UserDataProps | undefined) => {
-        setProfileInfo(res);
-      })
-      .catch((err: unknown) => {
-        console.error("Failed to retrieve profile data", err);
-      });
+    (async () => {
+      await getUserData()
+        .then((response: interfaces.UserDataProps | undefined) => {
+          setProfileInfo(response);
+        })
+        .catch((err: unknown) => {
+          console.error("Failed to retrieve profile data", err);
+        });
+    })();
 
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();

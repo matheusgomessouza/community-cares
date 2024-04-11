@@ -1,5 +1,4 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -9,12 +8,13 @@ import {
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import * as SecureStore from "expo-secure-store";
 import Icon from "react-native-vector-icons/FontAwesome";
 import IconMaterial from "react-native-vector-icons/MaterialIcons";
 
-import * as interfaces from "../interfaces/";
 import BackgroundImage from "../../assets/background-login-fix.svg";
+import AuthenticationContext from "contexts/authentication";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
@@ -22,21 +22,18 @@ const discovery = {
   revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_CLIENT_ID}`,
 };
 
-WebBrowser.maybeCompleteAuthSession();
-
 export default function SignInScreen() {
-  const [githubTokenData, setGithubTokenData] =
-    useState<interfaces.SuccessGithubResponseProps>(
-      {} as interfaces.SuccessGithubResponseProps
-    );
-  const [showSignInError, setShowSignInError] = useState<boolean>(false);
-
+  const {
+    codeExchange,
+    showSignInError,
+    setShowSignInError,
+  } = useContext(AuthenticationContext);
   const [request, response, signInWithGithub] = useAuthRequest(
     {
       clientId: process.env.EXPO_PUBLIC_CLIENT_ID
         ? process.env.EXPO_PUBLIC_CLIENT_ID
         : "",
-      scopes: ["identity"],
+      scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",
       }),
@@ -44,45 +41,12 @@ export default function SignInScreen() {
     discovery
   );
 
-  async function codeExchange(code: string) {
-    try {
-      const response = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_WSL_SERVER_IP}:8080/authenticate`,
-        {
-          code: code,
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      setGithubTokenData(response.data);
-
-      if (
-        response.status === 200 &&
-        Object.hasOwn(githubTokenData, "access_token")
-      ) {
-        await SecureStore.setItemAsync(
-          "github-token",
-          githubTokenData.access_token
-        );
-      }
-    } catch (error) {
-      console.error("Unable to perform code exchange", error);
-      setShowSignInError(true);
-    }
-  }
-
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-
       codeExchange(code);
     }
-  }, []);
+  }, [response]);
 
   return (
     <>
@@ -107,10 +71,6 @@ export default function SignInScreen() {
       <View style={styles.container}>
         <BackgroundImage width={"100%"} height={"100%"} />
         <View style={styles.signInContainer}>
-          {/* <TouchableOpacity style={styles.signInButton}>
-            <Text style={styles.textSignButton}>Google</Text>
-            <Icon name="google" size={16} color="#FFFF" />
-          </TouchableOpacity> */}
           <TouchableOpacity
             disabled={!request}
             style={styles.signInButton}

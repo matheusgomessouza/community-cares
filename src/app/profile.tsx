@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import * as SecureStore from "expo-secure-store";
@@ -8,8 +8,10 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconF from "react-native-vector-icons/FontAwesome";
 import { getUserData } from "services/github";
 import * as interfaces from "../interfaces";
+import AuthenticationContext from "contexts/authentication";
 
 export default function ProfileScreen() {
+  const { setIsUserAuthenticated } = useContext(AuthenticationContext);
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
@@ -72,6 +74,7 @@ export default function ProfileScreen() {
         style={styles.logOutButtonContainer}
         onPress={async () => {
           await SecureStore.deleteItemAsync("github-token");
+          setIsUserAuthenticated(false);
           router.replace("signin");
         }}
       >

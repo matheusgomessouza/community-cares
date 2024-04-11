@@ -1,6 +1,5 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-
 import * as interfaces from "../interfaces";
 
 const instance = axios.create({
@@ -11,30 +10,23 @@ const instance = axios.create({
   },
 });
 
-export async function getUserData(
-  access?: string
-): Promise<interfaces.UserDataProps | undefined> {
+async function retrieveStoreToken() {
+  return await SecureStore.getItemAsync("github-token");
+}
+
+export async function getUserData(): Promise<
+  interfaces.UserDataProps | undefined
+> {
   try {
-    if (access) {
-      const response = await instance.get("/user", {
+    const token = await retrieveStoreToken();
+
+    if (typeof token === "string") {
+      const { data } = await instance.get("/user", {
         headers: {
-          Authorization: `Bearer ${access}`,
+          Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response.data);
-      return response.data;
-    } else {
-      const token = await SecureStore.getItemAsync("github-token");
-
-      if (token) {
-        const response = await instance.get("/user", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        return response.data;
-      }
+      return data;
     }
   } catch (error) {
     console.error("Unable to retrieve user data [getUserData]", error);

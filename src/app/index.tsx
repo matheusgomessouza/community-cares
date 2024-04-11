@@ -1,24 +1,26 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 
 import SignInPage from "./signin";
 import MapScreen from "./map";
+import AuthenticationContext from "contexts/authentication";
 
 export default function Redirect() {
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const { isUserAuthenticated } = useContext(AuthenticationContext);
+  const [hasToken, setHasToken] = useState<boolean>(false);
 
-  async function getStorageToken() {
+  async function getUserToken() {
     try {
-      const token = await SecureStore.getItemAsync("github-token");
-      if (token) setAuthToken(token);
+      const response = await SecureStore.getItemAsync("github-token");
+      if (response) setHasToken(true);
     } catch (error) {
-      console.error("Unable to retrieve token from SecureStore", error);
+      return;
     }
   }
 
   useEffect(() => {
-    getStorageToken();
-  }, []);
+    getUserToken();
+  }, [isUserAuthenticated, hasToken]);
 
-  return authToken ? <MapScreen /> : <SignInPage />;
+  return isUserAuthenticated && hasToken ? <MapScreen /> : <SignInPage />;
 }

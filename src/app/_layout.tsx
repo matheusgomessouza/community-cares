@@ -3,7 +3,7 @@ import { useFonts, Shrikhand_400Regular } from "@expo-google-fonts/shrikhand";
 import {
   Montserrat_400Regular,
   Montserrat_700Bold,
-  Montserrat_900Black
+  Montserrat_900Black,
 } from "@expo-google-fonts/montserrat";
 import { UsabilityProvider } from "../contexts/usability";
 import { AuthenticationProvider } from "../contexts/authentication";
@@ -13,7 +13,7 @@ export default function App() {
     Shrikhand_400Regular,
     Montserrat_400Regular,
     Montserrat_700Bold,
-    Montserrat_900Black
+    Montserrat_900Black,
   });
 
   if (!fontsLoaded && !fontError) {

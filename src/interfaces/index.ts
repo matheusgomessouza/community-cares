@@ -10,6 +10,11 @@ export type UsabilityProviderProps = {
 export interface AuthenticationContextProps {
   isUserAuthenticated: boolean;
   setIsUserAuthenticated(value: boolean): void;
+  githubTokenData: SuccessGithubResponseProps;
+  setGithubTokenData(value: SuccessGithubResponseProps): void;
+  showSignInError: boolean;
+  setShowSignInError(value: boolean): void;
+  codeExchange(value: string): void;
 }
 
 export interface AuthenticationProviderProps {

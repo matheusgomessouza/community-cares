@@ -1,12 +1,13 @@
 {
   "expo": {
-    "name": "community-cares",
+    "name": "Community Cares",
     "slug": "community-cares",
     "scheme": "community-cares",
     "version": "1.0.0",
+    "owner": "mathw_z",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
@@ -40,6 +41,7 @@
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
-    ]
+    ],
+    "githubUrl": "https://github.com/matheusgomessouza/community-cares"
   }
 }
