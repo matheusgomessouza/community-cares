@@ -37,6 +37,6 @@ export interface UserDataProps {
   name: string;
   avatar_url: string;
   bio: string;
-  email?: string;
+  login?: string;
   location: string;
 }

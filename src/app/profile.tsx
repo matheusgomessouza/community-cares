@@ -68,10 +68,10 @@ export default function ProfileScreen() {
             <Text style={styles.profileName}>{profileData?.name}</Text>
             <Text style={styles.profileProfission}>{profileData?.bio}</Text>
             <View style={styles.userInfoWrapper}>
-              {profileData?.email && (
+              {profileData?.login && (
                 <View style={styles.userInfoContainer}>
-                  <Icon name="email" color="#C76E16" size={16} />
-                  <Text style={styles.userInfo}>{profileData?.email}</Text>
+                  <Icon name="account" color="#C76E16" size={16} />
+                  <Text style={styles.userInfo}>{profileData?.login}</Text>
                 </View>
               )}
               <View style={styles.userInfoContainer}>
