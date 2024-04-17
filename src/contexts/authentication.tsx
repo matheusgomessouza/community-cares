@@ -45,15 +45,12 @@ export function AuthenticationProvider({
           },
         }
       );
-
+      console.log("community-cares-server-payload", data);
       await saveToken(data.access_token, data.scope, data.token_type);
+      await SecureStore.setItemAsync("github-token", data.access_token);
 
       if (githubTokenData.access_token !== undefined) {
         setIsUserAuthenticated(true);
-        await SecureStore.setItemAsync(
-          "github-token",
-          githubTokenData.access_token
-        );
       }
     } catch (error) {
       console.error(

@@ -6,15 +6,32 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconF from "react-native-vector-icons/FontAwesome";
-import { getUserData } from "services/github";
+import { githubInstance } from "services/api";
 import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 
 export default function ProfileScreen() {
-  const { setIsUserAuthenticated } = useContext(AuthenticationContext);
+  const { setIsUserAuthenticated, githubTokenData } = useContext(
+    AuthenticationContext
+  );
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
+
+  async function getUserData(): Promise<interfaces.UserDataProps | undefined> {
+    try {
+      if (typeof githubTokenData.access_token === "string") {
+        const { data } = await githubInstance.get("/user", {
+          headers: {
+            Authorization: `Bearer ${githubTokenData.access_token}`,
+          },
+        });
+        return data;
+      }
+    } catch (error) {
+      console.error("Unable to retrieve user data [getUserData]", error);
+    }
+  }
 
   useEffect(() => {
     const response = getUserData();
@@ -34,12 +51,12 @@ export default function ProfileScreen() {
         <Icon
           name="arrow-left"
           size={24}
-          color="#EB841A"
+          color="#C76E16"
           onPress={() => {
             router.navigate("map");
           }}
         />
-        <IconF name="gear" size={24} color="#EB841A" onPress={() => {}} />
+        <IconF name="gear" size={24} color="#C76E16" onPress={() => {}} />
       </View>
       <View style={styles.profileInfo}>
         <View style={styles.profileHeadlineContainer}>
@@ -50,22 +67,22 @@ export default function ProfileScreen() {
           <View>
             <Text style={styles.profileName}>{profileData?.name}</Text>
             <Text style={styles.profileProfission}>{profileData?.bio}</Text>
-          </View>
-        </View>
-        <View style={styles.userInfoWrapper}>
-          {profileData?.email && (
-            <View style={styles.userInfoContainer}>
-              <Icon name="email" color="#EB841A" size={16} />
-              <Text style={styles.userInfo}>{profileData?.email}</Text>
+            <View style={styles.userInfoWrapper}>
+              {profileData?.email && (
+                <View style={styles.userInfoContainer}>
+                  <Icon name="email" color="#C76E16" size={16} />
+                  <Text style={styles.userInfo}>{profileData?.email}</Text>
+                </View>
+              )}
+              <View style={styles.userInfoContainer}>
+                <Icon name="web" color="#C76E16" size={16} />
+                <Text style={styles.userInfo}>{profileData?.location}</Text>
+              </View>
             </View>
-          )}
-          <View style={styles.userInfoContainer}>
-            <Icon name="map-marker" color="#EB841A" size={16} />
-            <Text style={styles.userInfo}>{profileData?.location}</Text>
           </View>
         </View>
         <View style={styles.achievementsLabelContainer}>
-          <Icon name="trophy" size={16} color="#EB841A" />
+          <Icon name="trophy" size={16} color="#C76E16" />
           <Text style={styles.achievementsLabel}>Achievements</Text>
         </View>
         <View style={styles.achievementsContainer}></View>
@@ -78,7 +95,7 @@ export default function ProfileScreen() {
           router.replace("signin");
         }}
       >
-        <Icon name="power" size={24} color="#EB841A" />
+        <Icon name="power" size={24} color="#C76E16" />
         <Text style={styles.logOutButtonText}>Log out</Text>
       </Pressable>
     </SafeAreaView>
@@ -112,14 +129,14 @@ const styles = StyleSheet.create({
   profileName: {
     fontFamily: "Shrikhand_400Regular",
     fontSize: 16,
-    color: "#EB841A",
+    color: "#C76E16",
   },
   profileProfission: {
     color: "#9F9B9B",
   },
   userInfoWrapper: {
     gap: 6,
-    marginTop: 24,
+    marginTop: 16,
   },
   userInfoContainer: {
     flexDirection: "row",
@@ -128,7 +145,7 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     color: "#9F9B9B",
-    fontFamily: "Montserrat_400Regular",
+    fontFamily: "Montserrat_700Bold",
     fontSize: 12,
   },
   achievementsLabelContainer: {
@@ -138,14 +155,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   achievementsLabel: {
-    fontFamily: "Montserrat_400Regular",
+    fontFamily: "Montserrat_700Bold",
     color: "#9F9B9B",
   },
   achievementsContainer: {
     width: "100%",
     height: 196,
-    backgroundColor: "#EB841A",
-    opacity: 0.21,
+    backgroundColor: "rgba(199,110,22, 0.4)",
     borderRadius: 25,
     marginTop: 16,
   },
@@ -156,7 +172,7 @@ const styles = StyleSheet.create({
     marginTop: "auto",
   },
   logOutButtonText: {
-    color: "#EB841A",
+    color: "#C76E16",
     fontFamily: "Montserrat_700Bold",
   },
 });

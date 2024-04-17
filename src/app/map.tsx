@@ -3,16 +3,18 @@ import { router } from "expo-router";
 import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import { useContext, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
-import { getUserData } from "services/github";
+import { githubInstance } from "services/api";
 import * as interfaces from "../interfaces";
+import AuthenticationContext from "contexts/authentication";
 
 export default function MapScreen() {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
+  const { githubTokenData } = useContext(AuthenticationContext);
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
@@ -21,39 +23,62 @@ export default function MapScreen() {
     null
   );
 
-  const circumference = (40075 / 360) * 1000;
-  const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
   let latDelta;
   let lonDelta;
 
-  if (location?.coords.accuracy) {
-    latDelta =
-      location?.coords.accuracy *
-      (1 / (Math.cos(location?.coords.latitude) * circumference));
-    lonDelta = location?.coords.accuracy / oneDegreeOfLongitudeInMeters;
+  function calculateCurrentPositionDeltas() {
+    const circumference = (40075 / 360) * 1000;
+    const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
+
+    if (location?.coords.accuracy) {
+      latDelta =
+        location?.coords.accuracy *
+        (1 / (Math.cos(location?.coords.latitude) * circumference));
+      lonDelta = location?.coords.accuracy / oneDegreeOfLongitudeInMeters;
+    }
+  }
+
+  async function requestLocationPermission() {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setLocation(location);
+  }
+
+  async function getUserData(): Promise<interfaces.UserDataProps | undefined> {
+    try {
+      if (typeof githubTokenData.access_token === "string") {
+        const { data } = await githubInstance.get("/user", {
+          headers: {
+            Authorization: `Bearer ${githubTokenData.access_token}`,
+          },
+        });
+        return data;
+      }
+    } catch (error) {
+      console.error("Unable to retrieve user data [getUserData]", error);
+    }
+  }
+
+  async function setPayloadUserData() {
+    const payload = await getUserData()
+      .then((response: interfaces.UserDataProps | undefined) => {
+        setProfileInfo(response);
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to retrieve profile data", err);
+      });
+    console.log("github-api-user-payload", payload);
   }
 
   useEffect(() => {
-    (async () => {
-      await getUserData()
-        .then((response: interfaces.UserDataProps | undefined) => {
-          setProfileInfo(response);
-        })
-        .catch((err: unknown) => {
-          console.error("Failed to retrieve profile data", err);
-        });
-    })();
-
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
+    calculateCurrentPositionDeltas();
+    requestLocationPermission();
+    setPayloadUserData();
   }, []);
 
   return (
@@ -65,20 +90,17 @@ export default function MapScreen() {
         </View>
       )}
       <View style={styles.navigationComponent}>
-        <Icon
-          name=""
-          size={24}
-          color="#FFFF"
+        <Pressable
           onPress={() => {
             router.navigate("profile");
           }}
-          style={[styles.navigationButton, { padding: 6 }]}
+          style={styles.navigationButton}
         >
           <Image
             source={profileData?.avatar_url}
             style={styles.profilePicture}
           />
-        </Icon>
+        </Pressable>
         <Text
           style={{
             fontFamily: "Montserrat_900Black",
@@ -87,15 +109,14 @@ export default function MapScreen() {
         >
           Community Cares
         </Text>
-        <Icon
-          name="magnify"
-          size={24}
-          color="#FFFF"
+        <Pressable
+          style={styles.navigationButton}
           onPress={() => {
             setShowFilter(true);
           }}
-          style={styles.navigationButton}
-        />
+        >
+          <Icon name="magnify" size={24} color="#FFFF" />
+        </Pressable>
       </View>
       <MapView
         initialRegion={{
@@ -122,7 +143,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   navigationComponent: {
-    zIndex: 50,
+    zIndex: 1,
     width: "80%",
     height: 56,
     backgroundColor: "#FFFF",
@@ -132,18 +153,22 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 32,
     alignItems: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   navigationButton: {
     backgroundColor: "#EB841A",
     borderRadius: 100,
     padding: 8,
     position: "relative",
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
   profilePicture: {
-    width: 32,
-    height: 32,
+    zIndex: 2,
+    width: 28,
+    height: 28,
     borderRadius: 100,
-    position: "absolute",
   },
 });

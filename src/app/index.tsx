@@ -20,7 +20,17 @@ export default function Redirect() {
 
   useEffect(() => {
     getUserToken();
-  }, [isUserAuthenticated, hasToken]);
+  }, [isUserAuthenticated]);
 
-  return isUserAuthenticated && hasToken ? <MapScreen /> : <SignInPage />;
+  // console.log({
+  //   message: "new render",
+  //   authContext: isUserAuthenticated,
+  //   token: hasToken,
+  // });
+
+  return hasToken || (isUserAuthenticated && hasToken) ? (
+    <MapScreen />
+  ) : (
+    <SignInPage />
+  );
 }
