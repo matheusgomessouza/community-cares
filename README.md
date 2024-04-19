@@ -1,6 +1,5 @@
-#community-cares
-Mobile app created using Expo + React Native
-
+![](./assets/readme/community-cares-logo.png)
+![](./assets/readme/community-cares-cover.jpg)
 
 **👨‍💻 Tecnologias / Technologies**
 
@@ -9,7 +8,8 @@ Esse projeto foi desenvolvido com as seguintes tecnologias / This project was de
 - [Expo](https://expo.dev/)
 - [Typescript](https://www.typescriptlang.org/)
 - [React Native](https://reactnative.dev/)
-
+- [Axios](https://axios-http.com/)
+- [Jest](https://jestjs.io/)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
