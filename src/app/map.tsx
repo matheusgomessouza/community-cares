@@ -25,6 +25,7 @@ export default function MapScreen() {
 
   let latDelta;
   let lonDelta;
+  console.log(latDelta, lonDelta);
 
   function calculateCurrentPositionDeltas() {
     const circumference = (40075 / 360) * 1000;
@@ -65,14 +66,13 @@ export default function MapScreen() {
   }
 
   async function setPayloadUserData() {
-    const payload = await getUserData()
+    await getUserData()
       .then((response: interfaces.UserDataProps | undefined) => {
         setProfileInfo(response);
       })
       .catch((err: unknown) => {
         console.error("Failed to retrieve profile data", err);
       });
-    console.log("github-api-user-payload", payload);
   }
 
   useEffect(() => {
@@ -120,10 +120,10 @@ export default function MapScreen() {
       </View>
       <MapView
         initialRegion={{
-          latitude: location?.coords.latitude ?? 37.78825,
-          longitude: location?.coords.longitude ?? -122.4324,
-          latitudeDelta: latDelta ?? 0.0922,
-          longitudeDelta: lonDelta ?? 0.421,
+          latitude: location?.coords.latitude ?? 0,
+          longitude: location?.coords.longitude ?? 0,
+          latitudeDelta: latDelta ?? 0,
+          longitudeDelta: lonDelta ?? 0,
         }}
         style={styles.map}
       />
