@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import * as SecureStore from "expo-secure-store";
@@ -6,43 +6,36 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconF from "react-native-vector-icons/FontAwesome";
-import { githubInstance } from "services/api";
+import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 
 export default function ProfileScreen() {
-  const { setIsUserAuthenticated, githubTokenData } = useContext(
+  const { setIsUserAuthenticated } = useContext(
     AuthenticationContext
   );
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
 
-  async function getUserData(): Promise<interfaces.UserDataProps | undefined> {
-    try {
-      if (typeof githubTokenData.access_token === "string") {
-        const { data } = await githubInstance.get("/user", {
-          headers: {
-            Authorization: `Bearer ${githubTokenData.access_token}`,
-          },
-        });
-        return data;
-      }
-    } catch (error) {
-      console.error("Unable to retrieve user data [getUserData]", error);
-    }
-  }
-
   useEffect(() => {
-    const response = getUserData();
-
-    response
-      .then((res: interfaces.UserDataProps | undefined) => {
-        setProfileInfo(res);
-      })
-      .catch((err: unknown) => {
-        console.error("Failed to retrieve profile data", err);
-      });
+    (async () => {
+      await getUserData()
+        .then((res: interfaces.UserDataProps | undefined) => {
+          if (res) {
+            setProfileInfo({
+              name: res.name,
+              avatar_url: res.avatar_url,
+              bio: res.bio,
+              login: res.login,
+              location: res.location,
+            });
+          }
+        })
+        .catch((err: unknown) => {
+          console.error("Failed to retrieve profile data", err);
+        });
+    })();
   }, []);
 
   return (

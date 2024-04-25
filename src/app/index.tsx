@@ -6,7 +6,7 @@ import MapScreen from "./map";
 import AuthenticationContext from "contexts/authentication";
 
 export default function Redirect() {
-  const { isUserAuthenticated, githubTokenData } = useContext(AuthenticationContext);
+  const { isUserAuthenticated } = useContext(AuthenticationContext);
   const [hasToken, setHasToken] = useState<boolean>(false);
 
   async function getUserToken() {
@@ -20,7 +20,7 @@ export default function Redirect() {
 
   useEffect(() => {
     getUserToken();
-  }, [isUserAuthenticated, githubTokenData]);
+  }, [isUserAuthenticated]);
 
   return hasToken || (isUserAuthenticated && hasToken) ? (
     <MapScreen />

@@ -13,23 +13,6 @@ export function AuthenticationProvider({
 }: interfaces.AuthenticationProviderProps) {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [showSignInError, setShowSignInError] = useState<boolean>(false);
-  const [githubTokenData, setGithubTokenData] =
-    useState<interfaces.SuccessGithubResponseProps>(
-      {} as interfaces.SuccessGithubResponseProps
-    );
-
-  async function saveToken(
-    accessToken: string,
-    scope: string,
-    tokenType: string
-  ) {
-    setGithubTokenData({
-      ...githubTokenData,
-      access_token: accessToken,
-      scope: scope,
-      token_type: tokenType,
-    });
-  }
 
   async function codeExchange(code: string): Promise<void> {
     try {
@@ -45,11 +28,10 @@ export function AuthenticationProvider({
           },
         }
       );
-      console.log("community-cares-server-payload", data);
-      await saveToken(data.access_token, data.scope, data.token_type);
+
       await SecureStore.setItemAsync("github-token", data.access_token);
 
-      if (githubTokenData.access_token !== undefined) {
+      if (await SecureStore.getItemAsync("github-token")) {
         setIsUserAuthenticated(true);
       }
     } catch (error) {
@@ -66,8 +48,6 @@ export function AuthenticationProvider({
       value={{
         isUserAuthenticated,
         setIsUserAuthenticated,
-        githubTokenData,
-        setGithubTokenData,
         showSignInError,
         setShowSignInError,
         codeExchange,

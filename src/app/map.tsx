@@ -4,71 +4,63 @@ import MapView from "react-native-maps";
 import * as Location from "expo-location";
 import { useContext, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useWindowDimensions } from "react-native";
+import { StatusBar } from "expo-status-bar";
+
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
-import { githubInstance } from "services/api";
+import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
-import AuthenticationContext from "contexts/authentication";
 
 export default function MapScreen() {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
-  const { githubTokenData } = useContext(AuthenticationContext);
-  const [profileData, setProfileInfo] = useState<
-    interfaces.UserDataProps | undefined
-  >({} as interfaces.UserDataProps | undefined);
+  const [profilePicture, setProfilePicture] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-
-  let latDelta;
-  let lonDelta;
-  console.log(latDelta, lonDelta);
+  const [latDelta, setLatDelta] = useState<number>();
+  const [lonDelta, setLonDelta] = useState<number>();
+  const { width, height } = useWindowDimensions();
 
   function calculateCurrentPositionDeltas() {
-    const circumference = (40075 / 360) * 1000;
-    const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
+    const desiredVerticalSpan = 0.04;
+    const desiredHorizontalSpan = 0.05;
 
     if (location?.coords.accuracy) {
-      latDelta =
-        location?.coords.accuracy *
-        (1 / (Math.cos(location?.coords.latitude) * circumference));
-      lonDelta = location?.coords.accuracy / oneDegreeOfLongitudeInMeters;
+      const latDeltaCalculated = Math.round(width) / desiredVerticalSpan;
+      setLatDelta(latDeltaCalculated);
+      const lonDeltaCalculated = Math.round(height) / desiredHorizontalSpan;
+      setLonDelta(lonDeltaCalculated);
     }
   }
 
   async function requestLocationPermission() {
     let { status } = await Location.requestForegroundPermissionsAsync();
+
     if (status !== "granted") {
       setErrorMsg("Permission to access location was denied");
       return;
     }
 
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location);
-  }
+    let location = await Location.getCurrentPositionAsync({
+      accuracy: 4,
+    });
 
-  async function getUserData(): Promise<interfaces.UserDataProps | undefined> {
-    try {
-      if (typeof githubTokenData.access_token === "string") {
-        const { data } = await githubInstance.get("/user", {
-          headers: {
-            Authorization: `Bearer ${githubTokenData.access_token}`,
-          },
-        });
-        return data;
-      }
-    } catch (error) {
-      console.error("Unable to retrieve user data [getUserData]", error);
+    if (location) setLocation(location);
+    if (location.coords.longitude && location.coords.latitude) {
+      calculateCurrentPositionDeltas();
+    } else {
+      setErrorMsg("Error during location calculation");
     }
   }
 
   async function setPayloadUserData() {
     await getUserData()
       .then((response: interfaces.UserDataProps | undefined) => {
-        setProfileInfo(response);
+        if (response) setProfilePicture(response?.avatar_url);
       })
       .catch((err: unknown) => {
         console.error("Failed to retrieve profile data", err);
@@ -76,19 +68,18 @@ export default function MapScreen() {
   }
 
   useEffect(() => {
-    calculateCurrentPositionDeltas();
-    requestLocationPermission();
     setPayloadUserData();
   }, []);
 
+  useEffect(() => {
+    requestLocationPermission();
+  }, [location]);
+
   return (
     <View style={styles.container}>
+      <StatusBar style="inverted" />
+
       {showFilter && <MenuOverlayComponent />}
-      {typeof errorMsg === "string" && (
-        <View>
-          <Text>{errorMsg}</Text>
-        </View>
-      )}
       <View style={styles.navigationComponent}>
         <Pressable
           onPress={() => {
@@ -96,10 +87,7 @@ export default function MapScreen() {
           }}
           style={styles.navigationButton}
         >
-          <Image
-            source={profileData?.avatar_url}
-            style={styles.profilePicture}
-          />
+          <Image source={profilePicture} style={styles.profilePicture} />
         </Pressable>
         <Text
           style={{
@@ -118,15 +106,50 @@ export default function MapScreen() {
           <Icon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
-      <MapView
-        initialRegion={{
-          latitude: location?.coords.latitude ?? 0,
-          longitude: location?.coords.longitude ?? 0,
-          latitudeDelta: latDelta ?? 0,
-          longitudeDelta: lonDelta ?? 0,
-        }}
-        style={styles.map}
-      />
+
+      {typeof errorMsg === "string" ? (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              textAlign: "center",
+            }}
+          >
+            {errorMsg}
+          </Text>
+        </View>
+      ) : (
+        <>
+          {location && latDelta && lonDelta ? (
+            <MapView
+              region={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: latDelta,
+                longitudeDelta: lonDelta,
+              }}
+              style={styles.map}
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text>Loading coordinates...</Text>
+            </View>
+          )}
+        </>
+      )}
     </View>
   );
 }
