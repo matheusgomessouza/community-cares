@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext } from "react";
 import { router } from "expo-router";
 import { Image } from "expo-image";
 import * as SecureStore from "expo-secure-store";
