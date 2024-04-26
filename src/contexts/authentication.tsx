@@ -13,6 +13,9 @@ export function AuthenticationProvider({
 }: interfaces.AuthenticationProviderProps) {
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   const [showSignInError, setShowSignInError] = useState<boolean>(false);
+  const [profileData, setProfileInfo] = useState<
+    interfaces.UserDataProps | undefined
+  >({} as interfaces.UserDataProps | undefined);
 
   async function codeExchange(code: string): Promise<void> {
     try {
@@ -46,6 +49,8 @@ export function AuthenticationProvider({
   return (
     <AuthenticationContext.Provider
       value={{
+        profileData,
+        setProfileInfo,
         isUserAuthenticated,
         setIsUserAuthenticated,
         showSignInError,

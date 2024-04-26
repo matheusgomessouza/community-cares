@@ -15,6 +15,7 @@ export async function getUserData(): Promise<
 > {
   try {
     const deviceToken = await SecureStore.getItemAsync("github-token");
+
     if (deviceToken) {
       const { data } = await githubInstance.get("/user", {
         headers: {

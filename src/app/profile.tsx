@@ -6,37 +6,12 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import IconF from "react-native-vector-icons/FontAwesome";
-import { getUserData } from "services/gituhb-api";
-import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 
 export default function ProfileScreen() {
-  const { setIsUserAuthenticated } = useContext(
+  const { setIsUserAuthenticated, profileData } = useContext(
     AuthenticationContext
   );
-  const [profileData, setProfileInfo] = useState<
-    interfaces.UserDataProps | undefined
-  >({} as interfaces.UserDataProps | undefined);
-
-  useEffect(() => {
-    (async () => {
-      await getUserData()
-        .then((res: interfaces.UserDataProps | undefined) => {
-          if (res) {
-            setProfileInfo({
-              name: res.name,
-              avatar_url: res.avatar_url,
-              bio: res.bio,
-              login: res.login,
-              location: res.location,
-            });
-          }
-        })
-        .catch((err: unknown) => {
-          console.error("Failed to retrieve profile data", err);
-        });
-    })();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

@@ -1,10 +1,9 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import MapView from "react-native-maps";
 import * as Location from "expo-location";
-import { useContext, useEffect, useState } from "react";
+import MapView, { Marker } from "react-native-maps";
+import { useContext, useEffect, useState, useRef } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useWindowDimensions } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -13,29 +12,16 @@ import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
 import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
+import AuthenticationContext from "contexts/authentication";
 
 export default function MapScreen() {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
-  const [profilePicture, setProfilePicture] = useState<string>("");
+  const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-  const [latDelta, setLatDelta] = useState<number>();
-  const [lonDelta, setLonDelta] = useState<number>();
-  const { width, height } = useWindowDimensions();
-
-  function calculateCurrentPositionDeltas() {
-    const desiredVerticalSpan = 0.04;
-    const desiredHorizontalSpan = 0.05;
-
-    if (location?.coords.accuracy) {
-      const latDeltaCalculated = Math.round(width) / desiredVerticalSpan;
-      setLatDelta(latDeltaCalculated);
-      const lonDeltaCalculated = Math.round(height) / desiredHorizontalSpan;
-      setLonDelta(lonDeltaCalculated);
-    }
-  }
+  const mapRef = useRef<MapView>(null);
 
   async function requestLocationPermission() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -50,30 +36,51 @@ export default function MapScreen() {
     });
 
     if (location) setLocation(location);
-    if (location.coords.longitude && location.coords.latitude) {
-      calculateCurrentPositionDeltas();
-    } else {
+    if (!location.coords.longitude && !location.coords.latitude) {
       setErrorMsg("Error during location calculation");
     }
   }
 
-  async function setPayloadUserData() {
-    await getUserData()
-      .then((response: interfaces.UserDataProps | undefined) => {
-        if (response) setProfilePicture(response?.avatar_url);
-      })
-      .catch((err: unknown) => {
-        console.error("Failed to retrieve profile data", err);
-      });
-  }
-
   useEffect(() => {
-    setPayloadUserData();
+    (async () => {
+      await getUserData()
+        .then((res: interfaces.UserDataProps | undefined) => {
+          if (res) {
+            setProfileInfo({
+              name: res.name,
+              avatar_url: res.avatar_url,
+              bio: res.bio,
+              login: res.login,
+              location: res.location,
+            });
+          }
+        })
+        .catch((err: unknown) => {
+          console.error("Failed to retrieve profile data", err);
+        });
+    })();
   }, []);
 
   useEffect(() => {
     requestLocationPermission();
   }, [location]);
+
+  useEffect(() => {
+    Location.watchPositionAsync(
+      {
+        accuracy: Location.LocationAccuracy.Highest,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (response) => {
+        setLocation(response);
+        mapRef.current?.animateCamera({
+          pitch: 70,
+          center: response.coords,
+        });
+      }
+    );
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -87,7 +94,7 @@ export default function MapScreen() {
           }}
           style={styles.navigationButton}
         >
-          <Image source={profilePicture} style={styles.profilePicture} />
+          <Image source={profileData?.avatar_url} style={styles.profilePicture} />
         </Pressable>
         <Text
           style={{
@@ -127,16 +134,24 @@ export default function MapScreen() {
         </View>
       ) : (
         <>
-          {location && latDelta && lonDelta ? (
+          {location ? (
             <MapView
+              ref={mapRef}
               region={{
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
-                latitudeDelta: latDelta,
-                longitudeDelta: lonDelta,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
               }}
               style={styles.map}
-            />
+            >
+              <Marker
+                coordinate={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                }}
+              />
+            </MapView>
           ) : (
             <View
               style={{

@@ -13,6 +13,8 @@ export interface AuthenticationContextProps {
   showSignInError: boolean;
   setShowSignInError(value: boolean): void;
   codeExchange(value: string): void;
+  profileData: UserDataProps | undefined;
+  setProfileInfo(value: UserDataProps): void;
 }
 
 export interface AuthenticationProviderProps {
