@@ -5,8 +5,8 @@ import * as SecureStore from "expo-secure-store";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import IconF from "react-native-vector-icons/FontAwesome";
 import AuthenticationContext from "contexts/authentication";
+import { StatusBar } from "expo-status-bar";
 
 export default function ProfileScreen() {
   const { setIsUserAuthenticated, profileData } = useContext(
@@ -15,16 +15,17 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
       <View style={styles.header}>
         <Icon
-          name="arrow-left"
+          name="chevron-left"
           size={24}
           color="#C76E16"
           onPress={() => {
             router.navigate("map");
           }}
         />
-        <IconF name="gear" size={24} color="#C76E16" onPress={() => {}} />
+        <Icon name="help-circle-outline" size={24} color="#C76E16" onPress={() => {}} />
       </View>
       <View style={styles.profileInfo}>
         <View style={styles.profileHeadlineContainer}>
@@ -50,10 +51,16 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View style={styles.achievementsLabelContainer}>
-          <Icon name="trophy" size={16} color="#C76E16" />
-          <Text style={styles.achievementsLabel}>Achievements</Text>
+          <View style={styles.achievementsLabelSubContainer}>
+            <Icon name="trophy" size={16} color="#C76E16" />
+            <Text style={styles.achievementsLabel}>Achievements</Text>
+          </View>
+          <Text style={styles.achievementsTracker}>{0} of 15</Text>
         </View>
         <View style={styles.achievementsContainer}></View>
+        <Pressable style={styles.seeMoreContainer}>
+          <Text style={styles.seeMoreButton}>See more</Text>
+        </Pressable>
       </View>
       <Pressable
         style={styles.logOutButtonContainer}
@@ -120,7 +127,17 @@ const styles = StyleSheet.create({
     marginTop: 32,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: 8,
+  },
+  achievementsLabelSubContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  achievementsTracker: {
+    color: "#9F9B9B",
+    fontSize: 12,
+    fontFamily: "Montserrat_400Regular",
   },
   achievementsLabel: {
     fontFamily: "Montserrat_700Bold",
@@ -128,10 +145,18 @@ const styles = StyleSheet.create({
   },
   achievementsContainer: {
     width: "100%",
-    height: 196,
+    height: 72,
     backgroundColor: "rgba(199,110,22, 0.4)",
-    borderRadius: 25,
+    borderRadius: 10,
     marginTop: 16,
+  },
+  seeMoreContainer: {
+    marginLeft: "auto",
+    marginTop: 8,
+  },
+  seeMoreButton: {
+    color: "#C76E16",
+    fontFamily: "Montserrat_700Bold",
   },
   logOutButtonContainer: {
     flexDirection: "row",

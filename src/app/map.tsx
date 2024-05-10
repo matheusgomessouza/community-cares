@@ -1,9 +1,9 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
 import { useContext, useEffect, useState, useRef } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -15,6 +15,7 @@ import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 
 export default function MapScreen() {
+  enableLatestRenderer();
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
@@ -75,7 +76,6 @@ export default function MapScreen() {
       (response) => {
         setLocation(response);
         mapRef.current?.animateCamera({
-          pitch: 70,
           center: response.coords,
         });
       }
@@ -84,7 +84,7 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="inverted" />
+      <StatusBar style="dark" translucent />
 
       {showFilter && <MenuOverlayComponent />}
       <View style={styles.navigationComponent}>
@@ -94,7 +94,10 @@ export default function MapScreen() {
           }}
           style={styles.navigationButton}
         >
-          <Image source={profileData?.avatar_url} style={styles.profilePicture} />
+          <Image
+            source={profileData?.avatar_url}
+            style={styles.profilePicture}
+          />
         </Pressable>
         <Text
           style={{
@@ -150,6 +153,7 @@ export default function MapScreen() {
                   latitude: location.coords.latitude,
                   longitude: location.coords.longitude,
                 }}
+                // image={require("../../assets/map-marker.png")}
               />
             </MapView>
           ) : (
@@ -189,9 +193,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     position: "absolute",
-    bottom: 32,
+    bottom: 64,
     alignItems: "center",
     paddingHorizontal: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   navigationButton: {
     backgroundColor: "#EB841A",

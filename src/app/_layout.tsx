@@ -21,18 +21,18 @@ export default function App() {
   }
 
   return (
-    <AuthenticationProvider>
-      <UsabilityProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="signin" />
-          <Stack.Screen name="map" />
-          <Stack.Screen name="profile" />
-        </Stack>
-      </UsabilityProvider>
-    </AuthenticationProvider>
+      <AuthenticationProvider>
+        <UsabilityProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="signin" />
+            <Stack.Screen name="map" />
+            <Stack.Screen name="profile" />
+          </Stack>
+        </UsabilityProvider>
+      </AuthenticationProvider>
   );
 }
