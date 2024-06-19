@@ -13,6 +13,7 @@ import UsabilityContext from "../contexts/usability";
 import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
+import { getLocations } from "services/database";
 
 export default function MapScreen() {
   enableLatestRenderer();
@@ -59,6 +60,10 @@ export default function MapScreen() {
         .catch((err: unknown) => {
           console.error("Failed to retrieve profile data", err);
         });
+    })();
+
+    (async () => {
+      await getLocations();
     })();
   }, []);
 

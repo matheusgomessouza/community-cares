@@ -20,7 +20,7 @@ export function AuthenticationProvider({
   async function codeExchange(code: string): Promise<void> {
     try {
       const { data } = await axios.post<interfaces.SuccessGithubResponseProps>(
-        `https://community-cares-server.vercel.app/authenticate`,
+        `https://community-cares-server.onrender.com/authenticate`,
         {
           code: code,
         },
