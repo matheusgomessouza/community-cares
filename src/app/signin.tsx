@@ -9,7 +9,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import GitHubIcon from "react-native-vector-icons/FontAwesome";
-import LoadingIcon from "react-native-vector-icons/AntDesign";
+import LoadingIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import ErrorIcon from "react-native-vector-icons/MaterialIcons";
 import Animated, {
   Easing,
@@ -100,11 +100,11 @@ export default function SignInScreen() {
             style={styles.signInButton}
             onPress={() => signInWithGithub()}
           >
-            {!isAuthenticating ? (
+            {isAuthenticating ? (
               <>
                 <Text style={styles.textSignButton}>Authenticating</Text>
                 <Animated.View style={animatedStyle}>
-                  <LoadingIcon name="loading1" size={16} color="#FFFF" />
+                  <LoadingIcon name="dots-circle" size={16}  color="#FFFF" />
                 </Animated.View>
               </>
             ) : (
