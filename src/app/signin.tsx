@@ -8,8 +8,16 @@ import {
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import Icon from "react-native-vector-icons/FontAwesome";
-import IconMaterial from "react-native-vector-icons/MaterialIcons";
+import GitHubIcon from "react-native-vector-icons/FontAwesome";
+import LoadingIcon from "react-native-vector-icons/AntDesign";
+import ErrorIcon from "react-native-vector-icons/MaterialIcons";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 import BackgroundImage from "../../assets/background-login-fix.svg";
 import AuthenticationContext from "contexts/authentication";
@@ -27,6 +35,7 @@ export default function SignInScreen() {
     codeExchange,
     showSignInError,
     setShowSignInError,
+    isAuthenticating,
   } = useContext(AuthenticationContext);
   const [request, response, signInWithGithub] = useAuthRequest(
     {
@@ -40,6 +49,7 @@ export default function SignInScreen() {
     },
     discovery
   );
+  const sv = useSharedValue<number>(0);
 
   useEffect(() => {
     if (response?.type === "success") {
@@ -48,12 +58,26 @@ export default function SignInScreen() {
     }
   }, [response]);
 
+  useEffect(() => {
+    sv.value = withRepeat(
+      withTiming(1, {
+        duration: 2000,
+        easing: Easing.bezier(0.25, -0.5, 0.25, 1),
+      }),
+      -1 // -1 means infinite loop
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${sv.value * 360}deg` }],
+  }));
+
   return (
     <>
       {showSignInError && (
         <View style={styles.errorModalOverlay}>
           <View style={styles.errorModal}>
-            <IconMaterial name="error" size={32} color="#EB841A" />
+            <ErrorIcon name="error" size={32} color="#EB841A" />
             <Text style={styles.errorModalText}>
               Unable to sign in, try again.
             </Text>
@@ -76,8 +100,19 @@ export default function SignInScreen() {
             style={styles.signInButton}
             onPress={() => signInWithGithub()}
           >
-            <Text style={styles.textSignButton}>Github</Text>
-            <Icon name="github" size={16} color="#FFFF" />
+            {!isAuthenticating ? (
+              <>
+                <Text style={styles.textSignButton}>Authenticating</Text>
+                <Animated.View style={animatedStyle}>
+                  <LoadingIcon name="loading1" size={16} color="#FFFF" />
+                </Animated.View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.textSignButton}>Github</Text>
+                <GitHubIcon name="github" size={16} color="#FFFF" />
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </View>

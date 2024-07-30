@@ -5,8 +5,7 @@ import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
 import { useContext, useEffect, useState, useRef } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
@@ -43,35 +42,36 @@ export default function MapScreen() {
     }
   }
 
-  useEffect(() => {
-    (async () => {
-      await getUserData()
-        .then((res: interfaces.UserDataProps | undefined) => {
-          if (res) {
-            setProfileInfo({
-              name: res.name,
-              avatar_url: res.avatar_url,
-              bio: res.bio,
-              login: res.login,
-              location: res.location,
-            });
-          }
-        })
-        .catch((err: unknown) => {
-          console.error("Failed to retrieve profile data", err);
-        });
-    })();
+  async function getAllLocations() {
+    const response = await getLocations();
+    console.log(response?.data);
+  }
 
-    (async () => {
-      await getLocations();
-    })();
-  }, []);
+  async function getGitHubUserData() {
+    await getUserData()
+      .then((res: interfaces.UserDataProps | undefined) => {
+        if (res) {
+          setProfileInfo({
+            name: res.name,
+            avatar_url: res.avatar_url,
+            bio: res.bio,
+            login: res.login,
+            location: res.location,
+          });
+        }
+      })
+      .catch((err: unknown) => {
+        console.error("Failed to retrieve profile data", err);
+      });
+  }
 
   useEffect(() => {
     requestLocationPermission();
   }, [location]);
 
   useEffect(() => {
+    getAllLocations();
+    getGitHubUserData();
     Location.watchPositionAsync(
       {
         accuracy: Location.LocationAccuracy.Highest,
@@ -118,7 +118,7 @@ export default function MapScreen() {
             setShowFilter(true);
           }}
         >
-          <Icon name="magnify" size={24} color="#FFFF" />
+            <SearchIcon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
 

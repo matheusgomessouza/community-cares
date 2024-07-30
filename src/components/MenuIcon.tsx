@@ -1,17 +1,17 @@
 import { useContext } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import MenuIcon from "react-native-vector-icons/MaterialIcons";
 import UsabilityContext from "../contexts/usability";
 
 export default function MenuIconComponent() {
-  const { showMenu, setShowMenu } = useContext(UsabilityContext);
+  const { showFilter, setShowFilter } = useContext(UsabilityContext);
 
   return (
     <TouchableOpacity
       style={styles.buttonContainer}
-      onPress={() => setShowMenu(!showMenu)}
+      onPress={() => setShowFilter(!showFilter)}
     >
-      <Icon name="menu" color="orange" size={32} />
+      <MenuIcon name="menu" color="orange" size={32} />
     </TouchableOpacity>
   );
 }

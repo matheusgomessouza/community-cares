@@ -11,18 +11,22 @@ const AuthenticationContext =
 export function AuthenticationProvider({
   children,
 }: interfaces.AuthenticationProviderProps) {
-  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [isUserAuthenticated, setIsUserAuthenticated] =
+    useState<boolean>(false);
   const [showSignInError, setShowSignInError] = useState<boolean>(false);
   const [profileData, setProfileInfo] = useState<
     interfaces.UserDataProps | undefined
   >({} as interfaces.UserDataProps | undefined);
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
   async function codeExchange(code: string): Promise<void> {
     try {
+      setIsAuthenticating(true);
       const { data } = await axios.post<interfaces.SuccessGithubResponseProps>(
         `https://community-cares-server.onrender.com/authenticate`,
         {
           code: code,
+          env: "mobile",
         },
         {
           headers: {
@@ -38,11 +42,14 @@ export function AuthenticationProvider({
         setIsUserAuthenticated(true);
       }
     } catch (error) {
+      setIsAuthenticating(false);
       console.error(
         "Unable to perform code exchange with Community Cares server",
         error
       );
       setShowSignInError(true);
+    } finally {
+      setIsAuthenticating(false);
     }
   }
 
@@ -56,6 +63,8 @@ export function AuthenticationProvider({
         showSignInError,
         setShowSignInError,
         codeExchange,
+        isAuthenticating,
+        setIsAuthenticating
       }}
     >
       {children}

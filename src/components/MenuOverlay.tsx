@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import CloseIcon from "react-native-vector-icons/MaterialIcons";
 import Checkbox from "expo-checkbox";
 
 import UsabilityContext from "../contexts/usability";
@@ -28,7 +28,7 @@ export default function MenuOverlayComponent() {
     <View style={styles.overlay}>
       <View style={styles.header}>
         <Text style={styles.headerLabel}>Filter by</Text>
-        <Icon
+        <CloseIcon
           name="close"
           size={32}
           color="#ffff"

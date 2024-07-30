@@ -5,7 +5,8 @@ export async function getLocations() {
     const response = await axios.get(
       "https://community-cares-server.onrender.com/locations"
     );
-    console.log(response.data);
+
+    return response;
   } catch (error) {
     console.error("Unable to retrieve Locations data /getLocations", error)
   }
