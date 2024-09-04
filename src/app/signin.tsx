@@ -54,7 +54,8 @@ export default function SignInScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-      codeExchange(code);
+
+      if (code) codeExchange(code);
     }
   }, [response]);
 
@@ -104,7 +105,7 @@ export default function SignInScreen() {
               <>
                 <Text style={styles.textSignButton}>Authenticating</Text>
                 <Animated.View style={animatedStyle}>
-                  <LoadingIcon name="dots-circle" size={16}  color="#FFFF" />
+                  <LoadingIcon name="dots-circle" size={16} color="#FFFF" />
                 </Animated.View>
               </>
             ) : (

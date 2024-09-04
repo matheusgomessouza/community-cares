@@ -64,7 +64,7 @@ export function AuthenticationProvider({
         setShowSignInError,
         codeExchange,
         isAuthenticating,
-        setIsAuthenticating
+        setIsAuthenticating,
       }}
     >
       {children}

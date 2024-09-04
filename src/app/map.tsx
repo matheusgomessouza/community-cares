@@ -22,6 +22,9 @@ export default function MapScreen() {
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
+  const [locations, setLocations] = useState<Array<interfaces.LocationsProps>>(
+    []
+  );
   const mapRef = useRef<MapView>(null);
 
   async function requestLocationPermission() {
@@ -43,8 +46,12 @@ export default function MapScreen() {
   }
 
   async function getAllLocations() {
-    const response = await getLocations();
-    console.log(response?.data);
+    try {
+      const response = await getLocations();
+      setLocations(response?.data);
+    } catch (error) {
+      console.error("Unable to retrieve Locations /getAllLocations", error);
+    }
   }
 
   async function getGitHubUserData() {
@@ -118,7 +125,7 @@ export default function MapScreen() {
             setShowFilter(true);
           }}
         >
-            <SearchIcon name="magnify" size={24} color="#FFFF" />
+          <SearchIcon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
 
@@ -153,13 +160,18 @@ export default function MapScreen() {
               }}
               style={styles.map}
             >
-              <Marker
-                coordinate={{
-                  latitude: location.coords.latitude,
-                  longitude: location.coords.longitude,
-                }}
-                // image={require("../../assets/map-marker.png")}
-              />
+              {locations.map((marker, index) => (
+                <Marker
+                  pinColor="#EB841A"
+                  key={index}
+                  coordinate={{
+                    latitude: Number(marker.coords.latitude),
+                    longitude: Number(marker.coords.longitude),
+                  }}
+                  title={marker.name}
+                  description={marker.type}
+                />
+              ))}
             </MapView>
           ) : (
             <View
@@ -169,7 +181,7 @@ export default function MapScreen() {
                 alignItems: "center",
               }}
             >
-              <Text>Loading coordinates...</Text>
+              <Text>Loading your current location...</Text>
             </View>
           )}
         </>

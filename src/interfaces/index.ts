@@ -42,3 +42,15 @@ export interface UserDataProps {
   login?: string;
   location: string;
 }
+
+export interface LocationsProps {
+  address: string;
+  contact: string;
+  coords: {
+    latitude: string;
+    longitude: string;
+  };
+  id: number;
+  name: string;
+  type: string;
+}

@@ -11,13 +11,13 @@ export default function MenuOverlayComponent() {
 
   const filterOptions = [
     {
-      title: "Food giveaway",
+      title: "Community kitchen",
     },
     {
-      title: "Food at low price",
+      title: "Solidarity kitchen",
     },
     {
-      title: "Community shelter",
+      title: "Shelter",
     },
     {
       title: "Hospital",
