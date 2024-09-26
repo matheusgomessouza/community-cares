@@ -54,3 +54,10 @@ export interface LocationsProps {
   name: string;
   type: string;
 }
+
+export enum EstablishmentTypeProps {
+  CommunityKitchen = "community-kitchen",
+  SolidarityKitchen = "solidarity-kitchen",
+  Shelter = "shelter",
+  Hospital = "hospital",
+}

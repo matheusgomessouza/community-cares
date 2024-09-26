@@ -3,9 +3,17 @@ import { router } from "expo-router";
 import * as Location from "expo-location";
 import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
 import { useContext, useEffect, useState, useRef } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ImageURISource,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
@@ -72,6 +80,37 @@ export default function MapScreen() {
       });
   }
 
+  function handleCenterLocation() {
+    Location.watchPositionAsync(
+      {
+        accuracy: Location.LocationAccuracy.Highest,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (response) => {
+        setLocation(response);
+        mapRef.current?.animateCamera({
+          center: response.coords,
+        });
+      }
+    );
+  }
+
+  function defineMarkerIcon(locationType: string): ImageURISource {
+    switch (locationType) {
+      case interfaces.EstablishmentTypeProps.CommunityKitchen:
+        return { uri: "/assets/community-kitchen.svg" };
+      case interfaces.EstablishmentTypeProps.SolidarityKitchen:
+        return { uri: "/assets/solidarity-kitchen.svg" };
+      case interfaces.EstablishmentTypeProps.Shelter:
+        return { uri: "/assets/shelter.svg" };
+      case interfaces.EstablishmentTypeProps.Hospital:
+        return { uri: "/assets//hospital.svg" };
+      default:
+        return { uri: "" };
+    }
+  }
+
   useEffect(() => {
     requestLocationPermission();
   }, [location]);
@@ -129,6 +168,17 @@ export default function MapScreen() {
         </Pressable>
       </View>
 
+      <Pressable
+        style={styles.locationCenterButton}
+        onPress={() => handleCenterLocation()}
+      >
+        <NavigationVariantIcon
+          size={24}
+          color="#EB841A"
+          name="navigation-variant"
+        />
+      </Pressable>
+
       {typeof errorMsg === "string" ? (
         <View
           style={{
@@ -170,6 +220,7 @@ export default function MapScreen() {
                   }}
                   title={marker.name}
                   description={marker.type}
+                  // icon={defineMarkerIcon(marker.type)}
                 />
               ))}
             </MapView>
@@ -240,5 +291,28 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 100,
+  },
+  locationCenterButton: {
+    borderRadius: 100,
+    backgroundColor: "#FFF",
+    position: "absolute",
+    bottom: 128,
+    left: 24,
+    width: 40,
+    height: 40,
+    zIndex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
