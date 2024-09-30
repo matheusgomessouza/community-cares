@@ -1,3 +1,4 @@
+import React from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
