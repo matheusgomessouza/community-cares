@@ -6,28 +6,34 @@ import Checkbox from "expo-checkbox";
 import UsabilityContext from "../contexts/usability";
 
 export default function MenuOverlayComponent() {
-  const { setShowFilter } = useContext(UsabilityContext);
+  const { setShowFilter, foreignUser } = useContext(UsabilityContext);
   const [isChecked, setChecked] = useState<boolean>();
 
   const filterOptions = [
     {
       title: "Community kitchen",
+      br_title: "Cozinha comunitária",
     },
     {
       title: "Solidarity kitchen",
+      br_title: "Cozinha solidária",
     },
     {
       title: "Shelter",
+      br_title: "Abrigo",
     },
     {
       title: "Hospital",
+      br_title: "Hospital",
     },
   ];
 
   return (
     <View style={styles.overlay}>
       <View style={styles.header}>
-        <Text style={styles.headerLabel}>Filter by</Text>
+        <Text style={styles.headerLabel}>
+          {foreignUser ? "Filter by" : "Filtrar por"}
+        </Text>
         <CloseIcon
           name="close"
           size={32}
@@ -55,12 +61,14 @@ export default function MenuOverlayComponent() {
               fontFamily: "Montserrat_400Regular",
             }}
           >
-            {item.title}
+            {foreignUser ? item.title : item.br_title}
           </Text>
         </View>
       ))}
       <TouchableOpacity style={styles.searchButtonContainer}>
-        <Text style={styles.searchButtonText}>Search</Text>
+        <Text style={styles.searchButtonText}>
+          {foreignUser ? "Search" : "Procurar"}
+        </Text>
       </TouchableOpacity>
     </View>
   );

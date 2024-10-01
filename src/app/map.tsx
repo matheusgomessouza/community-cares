@@ -25,7 +25,8 @@ import { getLocations } from "services/database";
 
 export default function MapScreen() {
   enableLatestRenderer();
-  const { showFilter, setShowFilter } = useContext(UsabilityContext);
+  const { showFilter, setShowFilter, foreignUser } =
+    useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
@@ -233,7 +234,11 @@ export default function MapScreen() {
                 alignItems: "center",
               }}
             >
-              <Text>Loading your current location...</Text>
+              <Text>
+                {foreignUser
+                  ? "Loading your current location..."
+                  : "Carregando sua localização atual..."}
+              </Text>
             </View>
           )}
         </>
