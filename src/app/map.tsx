@@ -2,10 +2,13 @@ import React from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
-import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
+import MapView, {
+  Marker,
+  enableLatestRenderer,
+  Callout,
+} from "react-native-maps";
 import { useContext, useEffect, useState, useRef } from "react";
 import {
-  ImageURISource,
   Platform,
   Pressable,
   StyleSheet,
@@ -15,6 +18,7 @@ import {
 import { StatusBar } from "expo-status-bar";
 import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
@@ -98,18 +102,18 @@ export default function MapScreen() {
     );
   }
 
-  function defineMarkerIcon(locationType: string): ImageURISource {
+  function defineMarkerIcon(locationType: string): string {
     switch (locationType) {
       case interfaces.EstablishmentTypeProps.CommunityKitchen:
-        return { uri: "/assets/community-kitchen.svg" };
+        return "countertop";
       case interfaces.EstablishmentTypeProps.SolidarityKitchen:
-        return { uri: "/assets/solidarity-kitchen.svg" };
+        return "silverware-spoon";
       case interfaces.EstablishmentTypeProps.Shelter:
-        return { uri: "/assets/shelter.svg" };
+        return "home";
       case interfaces.EstablishmentTypeProps.Hospital:
-        return { uri: "/assets//hospital.svg" };
+        return "hospital-box";
       default:
-        return { uri: "" };
+        return "";
     }
   }
 
@@ -222,18 +226,55 @@ export default function MapScreen() {
                   }}
                   title={marker.name}
                   description={marker.type}
-                  // icon={defineMarkerIcon(marker.type)}
-                />
+                >
+                  <Callout>
+                    <View style={styles.markerContainer}>
+                      <View style={styles.establishmentHeadlineWrapper}>
+                        <View style={styles.establishmentIcon}>
+                          <Icon
+                            size={16}
+                            name={defineMarkerIcon(marker.type)}
+                            color="#FFF"
+                          />
+                        </View>
+                        <View style={styles.establishmentHeadline}>
+                          <Text style={styles.establishmentName}>
+                            {marker.name}
+                          </Text>
+                          <Text style={styles.establishmentAddress}>
+                            {marker.address}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.establishmentContactWrapper}>
+                        <View style={styles.establishmentContactInfo}>
+                          <Text style={styles.establishmentContactText}>
+                            <Icon
+                              size={24}
+                              name="cellphone-basic"
+                              color="#9F9B9B"
+                            />{" "}
+                            {marker.contact}
+                          </Text>
+                          <Text style={styles.establishmentContactText}>
+                            <Icon size={24} name="whatsapp" color="#9F9B9B" />{" "}
+                            {marker.contact}
+                          </Text>
+                        </View>
+                        <Pressable style={styles.setDirectionsButtonContainer}>
+                          <Icon size={32} name="directions" color="#EB841A" />
+                          <Text style={styles.setDirectionsButtonText}>
+                            Set directions
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </Callout>
+                </Marker>
               ))}
             </MapView>
           ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+            <View style={styles.loadingLocationComponent}>
               <Text>
                 {foreignUser
                   ? "Loading your current location..."
@@ -253,6 +294,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  loadingLocationComponent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   map: {
     width: "100%",
@@ -320,5 +366,61 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
     }),
+  },
+  markerContainer: {
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  establishmentHeadlineWrapper: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+    borderRadius: 12
+  },
+  establishmentIcon: {
+    borderRadius: 100,
+    backgroundColor: "#EB841A",
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  establishmentName: {
+    fontFamily: "Shrikhand_400Regular",
+    fontSize: 12,
+    color: "#EB841A",
+  },
+  establishmentAddress: {
+    fontSize: 8,
+    color: "#9F9B9B",
+    flexWrap: "wrap",
+    width: "80%"
+  },
+  establishmentHeadline: {},
+  establishmentContactWrapper: {
+    marginTop: 24,
+    flexDirection: "row",
+    gap: 16,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
+  },
+  establishmentContactInfo: {
+    flexDirection: "column",
+  },
+  establishmentContactText: {
+    fontFamily: "Montserrat_800ExtraBold",
+    color: "#9F9B9B",
+  },
+  setDirectionsButtonContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  setDirectionsButtonText: {
+    color: "#EB841A",
+    fontFamily: "Montserrat_200ExtraLight",
+    fontSize: 8,
   },
 });
