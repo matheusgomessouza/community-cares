@@ -63,3 +63,8 @@ export enum EstablishmentTypeProps {
   Shelter = "shelter",
   Hospital = "hospital",
 }
+
+export interface DestinationDirectionProps {
+  show: boolean;
+  directionIndex: number;
+}

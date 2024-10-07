@@ -1,4 +1,3 @@
-import React from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
@@ -7,14 +6,9 @@ import MapView, {
   enableLatestRenderer,
   Callout,
 } from "react-native-maps";
-import { useContext, useEffect, useState, useRef } from "react";
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import MapViewDirections from "react-native-maps-directions";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -40,6 +34,10 @@ export default function MapScreen() {
     []
   );
   const mapRef = useRef<MapView>(null);
+  const [showDirection, setShowDirection] =
+    useState<interfaces.DestinationDirectionProps>(
+      {} as interfaces.DestinationDirectionProps
+    );
 
   async function requestLocationPermission() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -216,6 +214,36 @@ export default function MapScreen() {
               }}
               style={styles.map}
             >
+              {process.env.EXPO_PUBLIC_GOOGLE_API_KEY && showDirection.show && (
+                <MapViewDirections
+                  origin={location.coords}
+                  destination={{
+                    latitude: Number(
+                      locations[showDirection.directionIndex].coords.latitude
+                    ),
+                    longitude: Number(
+                      locations[showDirection.directionIndex].coords.longitude
+                    ),
+                  }}
+                  apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
+                  strokeWidth={3}
+                  strokeColor="orange"
+                  onStart={(params) => {
+                    console.log(
+                      `Started routing between "${params.origin}" and "${params.destination}"`
+                    );
+                  }}
+                  onReady={(result) => {
+                    console.log(`Distance: ${result.distance} km`);
+                    console.log(`Duration: ${result.duration} min.`);
+                  }}
+                />
+              )}
+              <Marker
+                coordinate={location.coords}
+                title="You are here"
+                pinColor="#75410D"
+              />
               {locations.map((marker, index) => (
                 <Marker
                   pinColor="#EB841A"
@@ -227,7 +255,15 @@ export default function MapScreen() {
                   title={marker.name}
                   description={marker.type}
                 >
-                  <Callout>
+                  <Callout
+                    onPress={() => {
+                      setShowDirection({
+                        ...showDirection,
+                        show: true,
+                        directionIndex: index,
+                      });
+                    }}
+                  >
                     <View style={styles.markerContainer}>
                       <View style={styles.establishmentHeadlineWrapper}>
                         <View style={styles.establishmentIcon}>
@@ -369,15 +405,13 @@ const styles = StyleSheet.create({
   },
   markerContainer: {
     padding: 16,
-    justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius: 100,
   },
   establishmentHeadlineWrapper: {
     flexDirection: "row",
     gap: 16,
-    width: "100%",
-    borderRadius: 12
+    borderRadius: 12,
   },
   establishmentIcon: {
     borderRadius: 100,
@@ -396,7 +430,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: "#9F9B9B",
     flexWrap: "wrap",
-    width: "80%"
+    width: "80%",
   },
   establishmentHeadline: {},
   establishmentContactWrapper: {
