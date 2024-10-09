@@ -1,4 +1,4 @@
-![](./assets/readme/community-cares-logo.png)
+
 ![](./assets/readme/community-cares-cover.png)
 
 **👨‍💻 Tecnologias / Technologies**
