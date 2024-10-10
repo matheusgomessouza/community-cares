@@ -1,19 +1,18 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
-import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
-import { useContext, useEffect, useState, useRef } from "react";
-import {
-  ImageURISource,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import MapView, {
+  Marker,
+  enableLatestRenderer,
+  Callout,
+} from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import MenuOverlayComponent from "../components/MenuOverlay";
 import UsabilityContext from "../contexts/usability";
@@ -21,10 +20,12 @@ import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 import { getLocations } from "services/database";
+import AchievementToastComponent from "components/AchievementToastComponent";
 
 export default function MapScreen() {
   enableLatestRenderer();
-  const { showFilter, setShowFilter } = useContext(UsabilityContext);
+  const { showFilter, setShowFilter, foreignUser } =
+    useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
@@ -34,6 +35,15 @@ export default function MapScreen() {
     []
   );
   const mapRef = useRef<MapView>(null);
+  const [showDirection, setShowDirection] =
+    useState<interfaces.DestinationDirectionProps>(
+      {} as interfaces.DestinationDirectionProps
+    );
+  const [achievementUnlocked, setAchievementUnlocked] =
+    useState<interfaces.AchievementActionProps>({
+      show: false,
+      type: "",
+    });
 
   async function requestLocationPermission() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -96,18 +106,18 @@ export default function MapScreen() {
     );
   }
 
-  function defineMarkerIcon(locationType: string): ImageURISource {
+  function defineMarkerIcon(locationType: string): string {
     switch (locationType) {
       case interfaces.EstablishmentTypeProps.CommunityKitchen:
-        return { uri: "/assets/community-kitchen.svg" };
+        return "countertop";
       case interfaces.EstablishmentTypeProps.SolidarityKitchen:
-        return { uri: "/assets/solidarity-kitchen.svg" };
+        return "silverware-spoon";
       case interfaces.EstablishmentTypeProps.Shelter:
-        return { uri: "/assets/shelter.svg" };
+        return "home";
       case interfaces.EstablishmentTypeProps.Hospital:
-        return { uri: "/assets//hospital.svg" };
+        return "hospital-box";
       default:
-        return { uri: "" };
+        return "";
     }
   }
 
@@ -133,6 +143,20 @@ export default function MapScreen() {
     );
   }, []);
 
+  useEffect(() => {
+    if (achievementUnlocked.show === true) {
+      setTimeout(
+        () =>
+          setAchievementUnlocked({
+            ...achievementUnlocked,
+            show: false,
+            type: "",
+          }),
+        2000
+      );
+    }
+  }, [achievementUnlocked.show]);
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" translucent />
@@ -150,14 +174,7 @@ export default function MapScreen() {
             style={styles.profilePicture}
           />
         </Pressable>
-        <Text
-          style={{
-            fontFamily: "Montserrat_900Black",
-            color: "#EB841A",
-          }}
-        >
-          Community Cares
-        </Text>
+        <Text style={styles.navigationComponentBrand}>Community Cares</Text>
         <Pressable
           style={styles.navigationButton}
           onPress={() => {
@@ -167,6 +184,21 @@ export default function MapScreen() {
           <SearchIcon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
+
+      {achievementUnlocked.show && (
+        <AchievementToastComponent
+          iconName={
+            achievementUnlocked.type === "crosshairs-gps"
+              ? interfaces.AchievementsProps.TRACE_LOCATION
+              : interfaces.AchievementsProps.KNOW_LOCATION_INFO
+          }
+          achievementDescription={
+            achievementUnlocked.type === "crosshairs-gps"
+              ? "Hey! Do you wanna a bite?"
+              : "Hmmm, show me more details about this!"
+          }
+        />
+      )}
 
       <Pressable
         style={styles.locationCenterButton}
@@ -180,22 +212,8 @@ export default function MapScreen() {
       </Pressable>
 
       {typeof errorMsg === "string" ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              textAlign: "center",
-            }}
-          >
-            {errorMsg}
-          </Text>
+        <View style={styles.errorMessageWrapper}>
+          <Text style={styles.errorMessageText}>{errorMsg}</Text>
         </View>
       ) : (
         <>
@@ -210,6 +228,23 @@ export default function MapScreen() {
               }}
               style={styles.map}
             >
+              {process.env.EXPO_PUBLIC_GOOGLE_API_KEY && showDirection.show && (
+                <MapViewDirections
+                  origin={location.coords}
+                  destination={{
+                    latitude: Number(
+                      locations[showDirection.directionIndex].coords.latitude
+                    ),
+                    longitude: Number(
+                      locations[showDirection.directionIndex].coords.longitude
+                    ),
+                  }}
+                  apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
+                  strokeWidth={4}
+                  strokeColor="orange"
+                />
+              )}
+              <Marker coordinate={location.coords} title="You are here" />
               {locations.map((marker, index) => (
                 <Marker
                   pinColor="#EB841A"
@@ -220,19 +255,81 @@ export default function MapScreen() {
                   }}
                   title={marker.name}
                   description={marker.type}
-                  // icon={defineMarkerIcon(marker.type)}
-                />
+                  onPress={() =>
+                    setAchievementUnlocked({
+                      ...achievementUnlocked,
+                      show: true,
+                      type: "information",
+                    })
+                  }
+                >
+                  <Callout
+                    onPress={() => {
+                      setShowDirection({
+                        ...showDirection,
+                        show: true,
+                        directionIndex: index,
+                      });
+
+                      setAchievementUnlocked({
+                        ...achievementUnlocked,
+                        show: true,
+                        type: "crosshairs-gps",
+                      });
+                    }}
+                  >
+                    <View style={styles.markerContainer}>
+                      <View style={styles.establishmentHeadlineWrapper}>
+                        <View style={styles.establishmentIcon}>
+                          <Icon
+                            size={16}
+                            name={defineMarkerIcon(marker.type)}
+                            color="#FFF"
+                          />
+                        </View>
+                        <View style={styles.establishmentHeadline}>
+                          <Text style={styles.establishmentName}>
+                            {marker.name}
+                          </Text>
+                          <Text style={styles.establishmentAddress}>
+                            {marker.address}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.establishmentContactWrapper}>
+                        <View style={styles.establishmentContactInfo}>
+                          <Text style={styles.establishmentContactText}>
+                            <Icon
+                              size={24}
+                              name="cellphone-basic"
+                              color="#9F9B9B"
+                            />{" "}
+                            {marker.contact}
+                          </Text>
+                          <Text style={styles.establishmentContactText}>
+                            <Icon size={24} name="whatsapp" color="#9F9B9B" />{" "}
+                            {marker.contact}
+                          </Text>
+                        </View>
+                        <Pressable style={styles.setDirectionsButtonContainer}>
+                          <Icon size={32} name="directions" color="#EB841A" />
+                          <Text style={styles.setDirectionsButtonText}>
+                            Set directions
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </Callout>
+                </Marker>
               ))}
             </MapView>
           ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>Loading your current location...</Text>
+            <View style={styles.loadingLocationComponent}>
+              <Text>
+                {foreignUser
+                  ? "Loading your current location..."
+                  : "Carregando sua localização atual..."}
+              </Text>
             </View>
           )}
         </>
@@ -248,15 +345,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  loadingLocationComponent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   map: {
     width: "100%",
     height: "100%",
   },
   navigationComponent: {
-    zIndex: 1,
+    zIndex: 3,
     width: "80%",
     height: 56,
-    backgroundColor: "#FFFF",
+    backgroundColor: "#FFF",
     borderRadius: 25,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -275,6 +377,10 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
     }),
+  },
+  navigationComponentBrand: {
+    fontFamily: "Montserrat_900Black",
+    color: "#EB841A",
   },
   navigationButton: {
     backgroundColor: "#EB841A",
@@ -300,7 +406,7 @@ const styles = StyleSheet.create({
     left: 24,
     width: 40,
     height: 40,
-    zIndex: 1,
+    zIndex: 2,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
@@ -314,5 +420,69 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
     }),
+  },
+  markerContainer: {
+    padding: 16,
+    alignItems: "center",
+    borderRadius: 100,
+  },
+  establishmentHeadlineWrapper: {
+    flexDirection: "row",
+    gap: 16,
+    borderRadius: 12,
+  },
+  establishmentIcon: {
+    borderRadius: 100,
+    backgroundColor: "#EB841A",
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  establishmentName: {
+    fontFamily: "Shrikhand_400Regular",
+    fontSize: 12,
+    color: "#EB841A",
+  },
+  establishmentAddress: {
+    fontSize: 8,
+    color: "#9F9B9B",
+    flexWrap: "wrap",
+    width: "80%",
+  },
+  establishmentHeadline: {},
+  establishmentContactWrapper: {
+    marginTop: 24,
+    flexDirection: "row",
+    gap: 16,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
+  },
+  establishmentContactInfo: {
+    flexDirection: "column",
+  },
+  establishmentContactText: {
+    fontFamily: "Montserrat_800ExtraBold",
+    color: "#9F9B9B",
+  },
+  setDirectionsButtonContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  setDirectionsButtonText: {
+    color: "#EB841A",
+    fontFamily: "Montserrat_200ExtraLight",
+    fontSize: 8,
+  },
+  errorMessageWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  errorMessageText: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });

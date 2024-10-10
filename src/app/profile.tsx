@@ -7,11 +7,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AuthenticationContext from "contexts/authentication";
 import { StatusBar } from "expo-status-bar";
+import UsabilityContext from "contexts/usability";
 
 export default function ProfileScreen() {
   const { setIsUserAuthenticated, profileData } = useContext(
     AuthenticationContext
   );
+  const { foreignUser } = useContext(UsabilityContext);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,7 +27,12 @@ export default function ProfileScreen() {
             router.navigate("map");
           }}
         />
-        <Icon name="help-circle-outline" size={24} color="#C76E16" onPress={() => {}} />
+        <Icon
+          name="help-circle-outline"
+          size={24}
+          color="#C76E16"
+          onPress={() => router.navigate("faq")}
+        />
       </View>
       <View style={styles.profileInfo}>
         <View style={styles.profileHeadlineContainer}>
@@ -53,7 +60,9 @@ export default function ProfileScreen() {
         <View style={styles.achievementsLabelContainer}>
           <View style={styles.achievementsLabelSubContainer}>
             <Icon name="trophy" size={16} color="#C76E16" />
-            <Text style={styles.achievementsLabel}>Achievements</Text>
+            <Text style={styles.achievementsLabel}>
+              {foreignUser ? "Achievements" : "Conquistas"}
+            </Text>
           </View>
           <Text style={styles.achievementsTracker}>{0} of 15</Text>
         </View>

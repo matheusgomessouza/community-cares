@@ -1,6 +1,8 @@
 export interface UsabilityContextProps {
   showFilter: boolean;
   setShowFilter: (value: boolean) => void;
+  foreignUser: boolean;
+  setForeignUser: (value: boolean) => void;
 }
 
 export type UsabilityProviderProps = {
@@ -60,4 +62,24 @@ export enum EstablishmentTypeProps {
   SolidarityKitchen = "solidarity-kitchen",
   Shelter = "shelter",
   Hospital = "hospital",
+}
+
+export interface DestinationDirectionProps {
+  show: boolean;
+  directionIndex: number;
+}
+
+export interface AchievementToastComponentProps {
+  iconName: string;
+  achievementDescription: string;
+}
+
+export enum AchievementsProps {
+  TRACE_LOCATION = "crosshairs-gps",
+  KNOW_LOCATION_INFO = "information",
+}
+
+export interface AchievementActionProps {
+  show: boolean;
+  type: string;
 }

@@ -9,12 +9,15 @@ export function UsabilityProvider({
   children,
 }: interfaces.UsabilityProviderProps) {
   const [showFilter, setShowFilter] = useState(false);
+  const [foreignUser, setForeignUser] = useState(false);
 
   return (
     <UsabilityContext.Provider
       value={{
         showFilter,
-        setShowFilter
+        setShowFilter,
+        foreignUser,
+        setForeignUser,
       }}
     >
       {children}
