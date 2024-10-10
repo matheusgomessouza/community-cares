@@ -20,6 +20,7 @@ import { getUserData } from "services/gituhb-api";
 import * as interfaces from "../interfaces";
 import AuthenticationContext from "contexts/authentication";
 import { getLocations } from "services/database";
+import AchievementToastComponent from "components/AchievementToastComponent";
 
 export default function MapScreen() {
   enableLatestRenderer();
@@ -38,6 +39,11 @@ export default function MapScreen() {
     useState<interfaces.DestinationDirectionProps>(
       {} as interfaces.DestinationDirectionProps
     );
+  const [achievementUnlocked, setAchievementUnlocked] =
+    useState<interfaces.AchievementActionProps>({
+      show: false,
+      type: "",
+    });
 
   async function requestLocationPermission() {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -137,6 +143,20 @@ export default function MapScreen() {
     );
   }, []);
 
+  useEffect(() => {
+    if (achievementUnlocked.show === true) {
+      setTimeout(
+        () =>
+          setAchievementUnlocked({
+            ...achievementUnlocked,
+            show: false,
+            type: "",
+          }),
+        2000
+      );
+    }
+  }, [achievementUnlocked.show]);
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" translucent />
@@ -154,14 +174,7 @@ export default function MapScreen() {
             style={styles.profilePicture}
           />
         </Pressable>
-        <Text
-          style={{
-            fontFamily: "Montserrat_900Black",
-            color: "#EB841A",
-          }}
-        >
-          Community Cares
-        </Text>
+        <Text style={styles.navigationComponentBrand}>Community Cares</Text>
         <Pressable
           style={styles.navigationButton}
           onPress={() => {
@@ -171,6 +184,21 @@ export default function MapScreen() {
           <SearchIcon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
+
+      {achievementUnlocked.show && (
+        <AchievementToastComponent
+          iconName={
+            achievementUnlocked.type === "crosshairs-gps"
+              ? interfaces.AchievementsProps.TRACE_LOCATION
+              : interfaces.AchievementsProps.KNOW_LOCATION_INFO
+          }
+          achievementDescription={
+            achievementUnlocked.type === "crosshairs-gps"
+              ? "Hey! Do you wanna a bite?"
+              : "Hmmm, show me more details about this!"
+          }
+        />
+      )}
 
       <Pressable
         style={styles.locationCenterButton}
@@ -184,22 +212,8 @@ export default function MapScreen() {
       </Pressable>
 
       {typeof errorMsg === "string" ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              textAlign: "center",
-            }}
-          >
-            {errorMsg}
-          </Text>
+        <View style={styles.errorMessageWrapper}>
+          <Text style={styles.errorMessageText}>{errorMsg}</Text>
         </View>
       ) : (
         <>
@@ -226,24 +240,11 @@ export default function MapScreen() {
                     ),
                   }}
                   apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
-                  strokeWidth={3}
+                  strokeWidth={4}
                   strokeColor="orange"
-                  onStart={(params) => {
-                    console.log(
-                      `Started routing between "${params.origin}" and "${params.destination}"`
-                    );
-                  }}
-                  onReady={(result) => {
-                    console.log(`Distance: ${result.distance} km`);
-                    console.log(`Duration: ${result.duration} min.`);
-                  }}
                 />
               )}
-              <Marker
-                coordinate={location.coords}
-                title="You are here"
-                pinColor="#75410D"
-              />
+              <Marker coordinate={location.coords} title="You are here" />
               {locations.map((marker, index) => (
                 <Marker
                   pinColor="#EB841A"
@@ -254,6 +255,13 @@ export default function MapScreen() {
                   }}
                   title={marker.name}
                   description={marker.type}
+                  onPress={() =>
+                    setAchievementUnlocked({
+                      ...achievementUnlocked,
+                      show: true,
+                      type: "information",
+                    })
+                  }
                 >
                   <Callout
                     onPress={() => {
@@ -261,6 +269,12 @@ export default function MapScreen() {
                         ...showDirection,
                         show: true,
                         directionIndex: index,
+                      });
+
+                      setAchievementUnlocked({
+                        ...achievementUnlocked,
+                        show: true,
+                        type: "crosshairs-gps",
                       });
                     }}
                   >
@@ -341,10 +355,10 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   navigationComponent: {
-    zIndex: 1,
+    zIndex: 3,
     width: "80%",
     height: 56,
-    backgroundColor: "#FFFF",
+    backgroundColor: "#FFF",
     borderRadius: 25,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -363,6 +377,10 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
     }),
+  },
+  navigationComponentBrand: {
+    fontFamily: "Montserrat_900Black",
+    color: "#EB841A",
   },
   navigationButton: {
     backgroundColor: "#EB841A",
@@ -388,7 +406,7 @@ const styles = StyleSheet.create({
     left: 24,
     width: 40,
     height: 40,
-    zIndex: 1,
+    zIndex: 2,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
@@ -456,5 +474,15 @@ const styles = StyleSheet.create({
     color: "#EB841A",
     fontFamily: "Montserrat_200ExtraLight",
     fontSize: 8,
+  },
+  errorMessageWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  errorMessageText: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });
