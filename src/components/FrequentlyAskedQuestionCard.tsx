@@ -1,18 +1,19 @@
 import { StyleSheet, View, Text } from "react-native";
+import * as interfaces from "@interfaces/index";
 
-export function FrequentlyAskedQuestionCardComponent() {
+export function FrequentlyAskedQuestionCardComponent({
+  questionLabel,
+  questionAnswer,
+}: interfaces.FrequentlyAskedQuestionProps) {
   return (
     <View style={styles.answerContainer}>
       <View style={styles.icon}>
         <Text style={styles.symbol}>?</Text>
       </View>
-      <Text style={styles.answerText}>
-        It has survived not only five centuries, but also the leap into
-        electronic typesetting, remaining essentially unchanged. It was
-        popularised in the 1960s with the release of Letraset sheets containing
-        Lorem Ipsum passages, and more recently with desktop publishing software
-        like Aldus PageMaker including versions of Lorem Ipsum.
-      </Text>
+      <View>
+        <Text style={styles.answerLabel}>{questionLabel}</Text>
+        <Text style={styles.answerText}>{questionAnswer}</Text>
+      </View>
     </View>
   );
 }
@@ -43,14 +44,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     marginBottom: 40,
   },
+  answerLabel: {
+    color: "#C76E16",
+    fontSize: 12,
+    fontFamily: "Montserrat_700Bold"
+  },
   answerText: {
     flexWrap: "wrap",
-    fontSize: 8,
+    fontSize: 10,
     fontFamily: "Montserrat_400Regular",
     width: "75%",
     textAlign: "justify",

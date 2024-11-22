@@ -8,8 +8,8 @@ import {
   Montserrat_800ExtraBold,
   Montserrat_900Black,
 } from "@expo-google-fonts/montserrat";
-import { UsabilityProvider } from "../contexts/usability";
-import { AuthenticationProvider } from "../contexts/authentication";
+import { UsabilityProvider } from "@contexts/usability";
+import { AuthenticationProvider } from "@contexts/authentication";
 
 export default function App() {
   let [fontsLoaded, fontError] = useFonts({

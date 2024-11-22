@@ -1,7 +1,7 @@
-import axios from "axios";
 import { createContext, useState } from "react";
 import * as interfaces from "../interfaces";
 import * as SecureStore from "expo-secure-store";
+import * as Services from "@services/index";
 
 const AuthenticationContext =
   createContext<interfaces.AuthenticationContextProps>(
@@ -22,21 +22,14 @@ export function AuthenticationProvider({
   async function codeExchange(code: string): Promise<void> {
     try {
       setIsAuthenticating(true);
-      const { data } = await axios.post<interfaces.SuccessGithubResponseProps>(
-        `https://community-cares-server.onrender.com/authenticate`,
-        {
-          code: code,
-          env: "mobile",
-        },
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response =
+        await Services.CommunityCaresService.postAuthenticateUser(code);
 
-      await SecureStore.setItemAsync("github-token", data.access_token);
+      if (response)
+        await SecureStore.setItemAsync(
+          "github-token",
+          response.data.access_token
+        );
 
       if (await SecureStore.getItemAsync("github-token")) {
         setIsUserAuthenticated(true);

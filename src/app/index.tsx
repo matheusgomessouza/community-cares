@@ -4,8 +4,8 @@ import * as Cellular from "expo-cellular";
 
 import SignInPage from "./signin";
 import MapScreen from "./map";
-import AuthenticationContext from "contexts/authentication";
-import UsabilityContext from "contexts/usability";
+import AuthenticationContext from "@contexts/authentication";
+import UsabilityContext from "@contexts/usability";
 
 export default function Redirect() {
   const { isUserAuthenticated } = useContext(AuthenticationContext);

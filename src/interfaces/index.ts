@@ -83,3 +83,14 @@ export interface AchievementActionProps {
   show: boolean;
   type: string;
 }
+
+export interface UserAchievementServiceProps {
+  username: string;
+  provider: string;
+  achievements: AchievementsProps;
+}
+
+export interface FrequentlyAskedQuestionProps {
+  questionLabel: string;
+  questionAnswer: string;
+}

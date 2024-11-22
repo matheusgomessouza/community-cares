@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-import { FrequentlyAskedQuestionCardComponent } from "components/FrequentlyAskedQuestionCard";
+import { FrequentlyAskedQuestionCardComponent } from "@components/FrequentlyAskedQuestionCard";
 
 export default function FrequentlyAskedQuestionsScreen() {
   return (
@@ -24,9 +24,18 @@ export default function FrequentlyAskedQuestionsScreen() {
         </View>
       </View>
       <ScrollView style={styles.questionScroll} scrollEnabled>
-        <FrequentlyAskedQuestionCardComponent />
-        <FrequentlyAskedQuestionCardComponent />
-        <FrequentlyAskedQuestionCardComponent />
+        <FrequentlyAskedQuestionCardComponent
+          questionLabel="Why should I write tests?"
+          questionAnswer="Because increases reliability of your codebase"
+        />
+        <FrequentlyAskedQuestionCardComponent
+          questionLabel="Why should I write tests?"
+          questionAnswer="Because increases reliability of your codebase"
+        />
+        <FrequentlyAskedQuestionCardComponent
+          questionLabel="Why should I write tests?"
+          questionAnswer="Because increases reliability of your codebase"
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -56,7 +65,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontFamily: "Montserrat_300Light_Italic",
     fontSize: 12,
-    color: "#9F9B9B"
+    color: "#9F9B9B",
   },
   questionScroll: { marginTop: 40, width: "100%" },
 });

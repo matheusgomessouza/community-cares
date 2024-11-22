@@ -2,7 +2,7 @@ import axios from "axios";
 import * as interfaces from "../interfaces";
 import * as SecureStore from "expo-secure-store";
 
-export const githubInstance = axios.create({
+const githubApiInstance = axios.create({
   baseURL: "https://api.github.com",
   headers: {
     Accept: "application/vnd.github+json",
@@ -17,7 +17,7 @@ export async function getUserData(): Promise<
     const deviceToken = await SecureStore.getItemAsync("github-token");
 
     if (deviceToken) {
-      const { data } = await githubInstance.get("/user", {
+      const { data } = await githubApiInstance.get("/user", {
         headers: {
           Authorization: `Bearer ${deviceToken}`,
         },

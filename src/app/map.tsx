@@ -1,26 +1,23 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
-import * as Location from "expo-location";
 import MapView, {
   Marker,
   enableLatestRenderer,
   Callout,
 } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import * as Location from "expo-location";
+import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import MapViewDirections from "react-native-maps-directions";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
-import MenuOverlayComponent from "../components/MenuOverlay";
-import UsabilityContext from "../contexts/usability";
-import { getUserData } from "services/gituhb-api";
-import * as interfaces from "../interfaces";
-import AuthenticationContext from "contexts/authentication";
-import { getLocations } from "services/database";
-import AchievementToastComponent from "components/AchievementToastComponent";
+import MenuOverlayComponent from "@components/MenuOverlay";
+import UsabilityContext from "@contexts/usability";
+import * as interfaces from "@interfaces/index";
+import AuthenticationContext from "@contexts/authentication";
+import * as Services from "@services/index";
+import { AchievementToastComponent } from "@components/AchievementToastComponent";
 
 export default function MapScreen() {
   enableLatestRenderer();
@@ -65,7 +62,7 @@ export default function MapScreen() {
 
   async function getAllLocations() {
     try {
-      const response = await getLocations();
+      const response = await Services.CommunityCaresService.getLocations();
       setLocations(response?.data);
     } catch (error) {
       console.error("Unable to retrieve Locations /getAllLocations", error);
@@ -73,7 +70,7 @@ export default function MapScreen() {
   }
 
   async function getGitHubUserData() {
-    await getUserData()
+    await Services.GitHubService.getUserData()
       .then((res: interfaces.UserDataProps | undefined) => {
         if (res) {
           setProfileInfo({
@@ -147,11 +144,10 @@ export default function MapScreen() {
     if (achievementUnlocked.show === true) {
       setTimeout(
         () =>
-          setAchievementUnlocked({
-            ...achievementUnlocked,
+          setAchievementUnlocked((previousState) => ({
+            ...previousState,
             show: false,
-            type: "",
-          }),
+          })),
         2000
       );
     }
@@ -162,6 +158,18 @@ export default function MapScreen() {
       <StatusBar style="dark" translucent />
 
       {showFilter && <MenuOverlayComponent />}
+
+      <Pressable
+        style={styles.locationCenterButton}
+        onPress={() => handleCenterLocation()}
+      >
+        <MaterialCommunityIcon
+          size={24}
+          color="#EB841A"
+          name="navigation-variant"
+        />
+      </Pressable>
+
       <View style={styles.navigationComponent}>
         <Pressable
           onPress={() => {
@@ -181,7 +189,7 @@ export default function MapScreen() {
             setShowFilter(true);
           }}
         >
-          <SearchIcon name="magnify" size={24} color="#FFFF" />
+          <MaterialCommunityIcon name="magnify" size={24} color="#FFFF" />
         </Pressable>
       </View>
 
@@ -199,17 +207,6 @@ export default function MapScreen() {
           }
         />
       )}
-
-      <Pressable
-        style={styles.locationCenterButton}
-        onPress={() => handleCenterLocation()}
-      >
-        <NavigationVariantIcon
-          size={24}
-          color="#EB841A"
-          name="navigation-variant"
-        />
-      </Pressable>
 
       {typeof errorMsg === "string" ? (
         <View style={styles.errorMessageWrapper}>
@@ -281,7 +278,7 @@ export default function MapScreen() {
                     <View style={styles.markerContainer}>
                       <View style={styles.establishmentHeadlineWrapper}>
                         <View style={styles.establishmentIcon}>
-                          <Icon
+                          <MaterialCommunityIcon
                             size={16}
                             name={defineMarkerIcon(marker.type)}
                             color="#FFF"
@@ -299,7 +296,7 @@ export default function MapScreen() {
                       <View style={styles.establishmentContactWrapper}>
                         <View style={styles.establishmentContactInfo}>
                           <Text style={styles.establishmentContactText}>
-                            <Icon
+                            <MaterialCommunityIcon
                               size={24}
                               name="cellphone-basic"
                               color="#9F9B9B"
@@ -307,12 +304,20 @@ export default function MapScreen() {
                             {marker.contact}
                           </Text>
                           <Text style={styles.establishmentContactText}>
-                            <Icon size={24} name="whatsapp" color="#9F9B9B" />{" "}
+                            <MaterialCommunityIcon
+                              size={24}
+                              name="whatsapp"
+                              color="#9F9B9B"
+                            />{" "}
                             {marker.contact}
                           </Text>
                         </View>
                         <Pressable style={styles.setDirectionsButtonContainer}>
-                          <Icon size={32} name="directions" color="#EB841A" />
+                          <MaterialCommunityIcon
+                            size={32}
+                            name="directions"
+                            color="#EB841A"
+                          />
                           <Text style={styles.setDirectionsButtonText}>
                             Set directions
                           </Text>
@@ -355,7 +360,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   navigationComponent: {
-    zIndex: 3,
+    zIndex: 1,
     width: "80%",
     height: 56,
     backgroundColor: "#FFF",
@@ -406,7 +411,7 @@ const styles = StyleSheet.create({
     left: 24,
     width: 40,
     height: 40,
-    zIndex: 2,
+    zIndex: 1,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({

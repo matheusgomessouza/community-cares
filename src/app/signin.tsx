@@ -7,11 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import GitHubIcon from "react-native-vector-icons/FontAwesome";
-import LoadingIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import ErrorIcon from "react-native-vector-icons/MaterialIcons";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -19,9 +14,14 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import GitHubIcon from "react-native-vector-icons/FontAwesome";
+import LoadingIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import ErrorIcon from "react-native-vector-icons/MaterialIcons";
 
 import BackgroundImage from "../../assets/background-login-fix.svg";
-import AuthenticationContext from "contexts/authentication";
+import AuthenticationContext from "@contexts/authentication";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -38,7 +38,7 @@ export default function SignInScreen() {
     setShowSignInError,
     isAuthenticating,
   } = useContext(AuthenticationContext);
-  const [request, response, signInWithGithub] = useAuthRequest(
+  const [, response, signInWithGithub] = useAuthRequest(
     {
       clientId: process.env.EXPO_PUBLIC_CLIENT_ID
         ? process.env.EXPO_PUBLIC_CLIENT_ID
@@ -51,11 +51,9 @@ export default function SignInScreen() {
     discovery
   );
   const sv = useSharedValue<number>(0);
-
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-
       if (code) codeExchange(code);
     }
   }, [response]);
@@ -98,7 +96,7 @@ export default function SignInScreen() {
         <BackgroundImage width={"100%"} height={"100%"} />
         <View style={styles.signInContainer}>
           <TouchableOpacity
-            disabled={!request}
+            disabled={isAuthenticating}
             style={styles.signInButton}
             onPress={() => signInWithGithub()}
           >

@@ -1,13 +1,14 @@
 import { useContext } from "react";
 import { router } from "expo-router";
 import { Image } from "expo-image";
+import { StatusBar } from "expo-status-bar";
 import * as SecureStore from "expo-secure-store";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import AuthenticationContext from "contexts/authentication";
-import { StatusBar } from "expo-status-bar";
-import UsabilityContext from "contexts/usability";
+
+import AuthenticationContext from "@contexts/authentication";
+import UsabilityContext from "@contexts/usability";
 
 export default function ProfileScreen() {
   const { setIsUserAuthenticated, profileData } = useContext(
