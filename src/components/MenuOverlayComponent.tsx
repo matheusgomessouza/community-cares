@@ -5,7 +5,7 @@ import Checkbox from "expo-checkbox";
 
 import UsabilityContext from "../contexts/usability";
 
-export default function MenuOverlayComponent() {
+export function MenuOverlayComponent() {
   const { setShowFilter, foreignUser } = useContext(UsabilityContext);
   const [isChecked, setChecked] = useState<boolean>();
 

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { FrequentlyAskedQuestionCardComponent } from "@components/FrequentlyAskedQuestionCard";
+import { FrequentlyAskedQuestionCardComponent } from "@components/FrequentlyAskedQuestionCardComponent";
 
 test("given a certain text props, user should see the FAQ and answer", () => {
   render(

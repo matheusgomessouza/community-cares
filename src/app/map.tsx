@@ -12,7 +12,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import MapViewDirections from "react-native-maps-directions";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
-import MenuOverlayComponent from "@components/MenuOverlay";
+import { MenuOverlayComponent } from "@components/MenuOverlayComponent";
 import UsabilityContext from "@contexts/usability";
 import * as interfaces from "@interfaces/index";
 import AuthenticationContext from "@contexts/authentication";

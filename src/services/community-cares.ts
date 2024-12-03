@@ -43,7 +43,7 @@ export async function postAchievements({
       );
     }
   } catch (error) {
-    console.error("Unable to save achievements progress /postAchievement");
+    console.error("Unable to save achievements progress /postAchievement", error);
   }
 }
 
