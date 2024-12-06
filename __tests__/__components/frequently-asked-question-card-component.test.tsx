@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react-native";
+import { expect } from '@jest/globals';
 
 import { FrequentlyAskedQuestionCardComponent } from "@components/FrequentlyAskedQuestionCardComponent";
 

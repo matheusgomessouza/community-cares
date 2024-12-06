@@ -26,7 +26,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#EB841A"
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -42,6 +46,14 @@
         }
       ]
     ],
-    "githubUrl": "https://github.com/matheusgomessouza/community-cares"
+    "githubUrl": "https://github.com/matheusgomessouza/community-cares",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1f009879-40ba-4ad1-a693-4b90fe45a298"
+      }
+    }
   }
 }

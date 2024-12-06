@@ -1,4 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
+import { expect } from '@jest/globals';
+
 import { AchievementToastComponent } from "@components/AchievementToastComponent";
 
 test("given achievementDescription, user can see description displayed in the component", () => {
