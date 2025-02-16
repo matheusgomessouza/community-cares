@@ -41,7 +41,9 @@ export default function SignInScreen() {
   } = useContext(AuthenticationContext);
   const [, response, signInWithGithub] = useAuthRequest(
     {
-      clientId: env.EXPO_PUBLIC_CLIENT_ID ? env.EXPO_PUBLIC_CLIENT_ID : "",
+      clientId: env.EXPO_PUBLIC_CLIENT_ID
+        ? env.EXPO_PUBLIC_CLIENT_ID
+        : "",
       scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",

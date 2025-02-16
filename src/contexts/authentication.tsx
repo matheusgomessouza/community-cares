@@ -25,15 +25,16 @@ export function AuthenticationProvider({
       const response =
         await Services.CommunityCaresService.postAuthenticateUser(code);
 
-      if (response)
+      if (response) {
         await SecureStore.setItemAsync(
           "github-token",
           response.data.access_token
         );
-
-      if (await SecureStore.getItemAsync("github-token")) {
-        setIsUserAuthenticated(true);
       }
+      const savedToken = await SecureStore.getItemAsync("github-token");
+
+      if (savedToken) setIsUserAuthenticated(true);
+      
     } catch (error) {
       setIsAuthenticating(false);
       console.error(
