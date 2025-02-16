@@ -1,7 +1,4 @@
-import MapView, {
-  Marker,
-  Callout,
-} from "react-native-maps";
+import MapView, { Marker, Callout } from "react-native-maps";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
@@ -17,6 +14,7 @@ import * as interfaces from "@interfaces/index";
 import AuthenticationContext from "@contexts/authentication";
 import * as Services from "@services/index";
 import { AchievementToastComponent } from "@components/AchievementToastComponent";
+import { env } from "../../env";
 
 export default function MapScreen() {
   const { showFilter, setShowFilter, foreignUser } =
@@ -223,7 +221,7 @@ export default function MapScreen() {
               }}
               style={styles.map}
             >
-              {process.env.EXPO_PUBLIC_GOOGLE_API_KEY && showDirection.show && (
+              {env.EXPO_PUBLIC_GOOGLE_API_KEY && showDirection.show && (
                 <MapViewDirections
                   origin={location.coords}
                   destination={{
@@ -234,7 +232,7 @@ export default function MapScreen() {
                       locations[showDirection.directionIndex].coords.longitude
                     ),
                   }}
-                  apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
+                  apikey={env.EXPO_PUBLIC_GOOGLE_API_KEY}
                   strokeWidth={4}
                   strokeColor="orange"
                 />

@@ -22,13 +22,14 @@ import ErrorIcon from "react-native-vector-icons/MaterialIcons";
 
 import BackgroundImage from "../../assets/background-login-fix.svg";
 import AuthenticationContext from "@contexts/authentication";
+import { env } from "../../env";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
   tokenEndpoint: "https://github.com/login/oauth/access_token",
-  revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_CLIENT_ID}`,
+  revocationEndpoint: `https://github.com/settings/connections/applications/${env.EXPO_PUBLIC_CLIENT_ID}`,
 };
 
 export default function SignInScreen() {
@@ -40,9 +41,7 @@ export default function SignInScreen() {
   } = useContext(AuthenticationContext);
   const [, response, signInWithGithub] = useAuthRequest(
     {
-      clientId: process.env.EXPO_PUBLIC_CLIENT_ID
-        ? process.env.EXPO_PUBLIC_CLIENT_ID
-        : "",
+      clientId: env.EXPO_PUBLIC_CLIENT_ID ? env.EXPO_PUBLIC_CLIENT_ID : "",
       scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",

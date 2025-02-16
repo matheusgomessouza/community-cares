@@ -1,9 +1,10 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import * as interfaces from "@interfaces/index";
+import { env } from "../../env";
 
 export const communityCaresServerInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API,
+  baseURL: env.EXPO_PUBLIC_API,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -43,7 +44,10 @@ export async function postAchievements({
       );
     }
   } catch (error) {
-    console.error("Unable to save achievements progress /postAchievement", error);
+    console.error(
+      "Unable to save achievements progress /postAchievement",
+      error
+    );
   }
 }
 
