@@ -1,6 +1,5 @@
 import MapView, {
   Marker,
-  enableLatestRenderer,
   Callout,
 } from "react-native-maps";
 import { Image } from "expo-image";
@@ -20,7 +19,6 @@ import * as Services from "@services/index";
 import { AchievementToastComponent } from "@components/AchievementToastComponent";
 
 export default function MapScreen() {
-  enableLatestRenderer();
   const { showFilter, setShowFilter, foreignUser } =
     useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
