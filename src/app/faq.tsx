@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { SafeAreaView, Text, StyleSheet, View, ScrollView } from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { FrequentlyAskedQuestionCardComponent } from "@components/FrequentlyAskedQuestionCardComponent";
 

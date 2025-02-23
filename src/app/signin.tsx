@@ -16,13 +16,13 @@ import Animated, {
 } from "react-native-reanimated";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import GitHubIcon from "react-native-vector-icons/FontAwesome";
-import LoadingIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import ErrorIcon from "react-native-vector-icons/MaterialIcons";
+import GitHubIcon from "@expo/vector-icons/FontAwesome";
+import LoadingIcon from "@expo/vector-icons/MaterialCommunityIcons";
+import ErrorIcon from "@expo/vector-icons/MaterialIcons";
 
 import BackgroundImage from "../../assets/background-login-fix.svg";
 import AuthenticationContext from "@contexts/authentication";
-import { env } from "../../env";
+import { env } from "env";
 
 WebBrowser.maybeCompleteAuthSession();
 

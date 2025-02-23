@@ -1,9 +1,9 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import * as interfaces from "@interfaces/index";
-import { env } from "../../env";
+import { env } from "env";
 
-export const communityCaresServerInstance = axios.create({
+const communityCaresServerInstance = axios.create({
   baseURL: env.EXPO_PUBLIC_API,
   headers: {
     Accept: "application/json",

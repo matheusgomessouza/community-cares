@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import MapViewDirections from "react-native-maps-directions";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcon from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { MenuOverlayComponent } from "@components/MenuOverlayComponent";
 import UsabilityContext from "@contexts/usability";
@@ -14,7 +14,8 @@ import * as interfaces from "@interfaces/index";
 import AuthenticationContext from "@contexts/authentication";
 import * as Services from "@services/index";
 import { AchievementToastComponent } from "@components/AchievementToastComponent";
-import { env } from "../../env";
+import { env } from "env";
+import { IconProps } from "@expo/vector-icons/build/createIconSet";
 
 export default function MapScreen() {
   const { showFilter, setShowFilter, foreignUser } =
@@ -99,18 +100,18 @@ export default function MapScreen() {
     );
   }
 
-  function defineMarkerIcon(locationType: string): string {
+  function defineMarkerIcon(locationType: string): IconProps<string> {
     switch (locationType) {
       case interfaces.EstablishmentTypeProps.CommunityKitchen:
-        return "countertop";
+        return { name: "countertop" };
       case interfaces.EstablishmentTypeProps.SolidarityKitchen:
-        return "silverware-spoon";
+        return { name: "silverware-spoon" };
       case interfaces.EstablishmentTypeProps.Shelter:
-        return "home";
+        return { name: "home" };
       case interfaces.EstablishmentTypeProps.Hospital:
-        return "hospital-box";
+        return { name: "hospital-box" };
       default:
-        return "";
+        return { name: "marker" };
     }
   }
 
@@ -276,7 +277,7 @@ export default function MapScreen() {
                         <View style={styles.establishmentIcon}>
                           <MaterialCommunityIcon
                             size={16}
-                            name={defineMarkerIcon(marker.type)}
+                            name={"marker"}
                             color="#FFF"
                           />
                         </View>
