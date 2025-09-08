@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import * as Cellular from "expo-cellular";
 
-import SignInPage from "./signin";
+import SignInScreen from "./signin";
 import MapScreen from "./map";
 import AuthenticationContext from "@contexts/authentication";
 import UsabilityContext from "@contexts/usability";
@@ -17,7 +17,7 @@ export default function Redirect() {
       const response = await SecureStore.getItemAsync("github-token");
       if (response) setHasToken(true);
     } catch (error) {
-      return;
+      return error;
     }
   }
 
@@ -30,7 +30,7 @@ export default function Redirect() {
       }
     } catch (error) {
       console.error(
-        "Unable to retrieve MCC (Mobile Country Code) /getUserCountry"
+        "Unable to retrieve MCC (Mobile Country Code) /getUserCountry", error
       );
     }
   }
@@ -43,6 +43,6 @@ export default function Redirect() {
   return hasToken || (isUserAuthenticated && hasToken) ? (
     <MapScreen />
   ) : (
-    <SignInPage />
+    <SignInScreen />
   );
 }

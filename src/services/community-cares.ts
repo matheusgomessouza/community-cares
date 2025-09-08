@@ -1,7 +1,12 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import * as interfaces from "@interfaces/index";
-import { env } from "env";
+import { env } from "../env";
+
+interface ValidationError {
+  message: string;
+  errors: Record<string, string[]>;
+}
 
 const communityCaresServerInstance = axios.create({
   baseURL: env.EXPO_PUBLIC_API,
@@ -61,12 +66,14 @@ export async function postAuthenticateUser(code: string) {
           env: "mobile",
         }
       );
-
     return response;
   } catch (error) {
-    console.error(
-      "Unable to authenticate, please try again /postAuthenticateUser",
-      error
-    );
+    if (axios.isAxiosError<ValidationError>(error)) {
+      console.error(
+        `Unable to authenticate, please try again /postAuthenticateUser | Data: ${error.response?.data} | Message: ${error.message}`
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
   }
 }
