@@ -19,11 +19,11 @@ export function AuthenticationProvider({
   >({} as interfaces.UserDataProps | undefined);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
 
-  async function codeExchange(code: string): Promise<void> {
+  async function codeExchange(code: string, codeVerifier: string): Promise<void> {
     try {
       setIsAuthenticating(true);
       const response =
-        await Services.CommunityCaresService.postAuthenticateUser(code);
+        await Services.CommunityCaresService.postAuthenticateUser(code, codeVerifier);
 
       if (response) {
         await SecureStore.setItemAsync(

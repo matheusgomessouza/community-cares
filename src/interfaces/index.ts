@@ -14,7 +14,7 @@ export interface AuthenticationContextProps {
   setIsUserAuthenticated(value: boolean): void;
   showSignInError: boolean;
   setShowSignInError(value: boolean): void;
-  codeExchange(value: string): void;
+  codeExchange(code: string, codeVerifier: string): void;
   profileData: UserDataProps | undefined;
   setProfileInfo(value: UserDataProps): void;
   isAuthenticating: boolean;

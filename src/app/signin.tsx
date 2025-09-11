@@ -17,6 +17,7 @@ import Animated, {
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import GitHubIcon from "@expo/vector-icons/FontAwesome";
+import GoogleIcon from "@expo/vector-icons/FontAwesome";
 import LoadingIcon from "@expo/vector-icons/MaterialCommunityIcons";
 import ErrorIcon from "@expo/vector-icons/MaterialIcons";
 
@@ -39,7 +40,7 @@ export default function SignInScreen() {
     setShowSignInError,
     isAuthenticating,
   } = useContext(AuthenticationContext);
-  const [, response, signInWithGithub] = useAuthRequest(
+  const [request, response, signInWithGithub] = useAuthRequest(
     {
       clientId: env.EXPO_PUBLIC_CLIENT_ID
         ? env.EXPO_PUBLIC_CLIENT_ID
@@ -55,7 +56,8 @@ export default function SignInScreen() {
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-      if (code) codeExchange(code);
+      const codeVerifier = request?.codeVerifier;
+      if (code && codeVerifier) codeExchange(code, codeVerifier);
     }
   }, [response]);
 
@@ -112,6 +114,25 @@ export default function SignInScreen() {
               <>
                 <Text style={styles.textSignButton}>Github</Text>
                 <GitHubIcon name="github" size={16} color="#FFFF" />
+              </>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={isAuthenticating}
+            style={styles.signInButton}
+            onPress={() => {}}
+          >
+            {isAuthenticating ? (
+              <>
+                <Text style={styles.textSignButton}>Authenticating</Text>
+                <Animated.View style={animatedStyle}>
+                  <LoadingIcon name="dots-circle" size={16} color="#FFFF" />
+                </Animated.View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.textSignButton}>Google</Text>
+                <GoogleIcon name="google" size={16} color="#FFFF" />
               </>
             )}
           </TouchableOpacity>

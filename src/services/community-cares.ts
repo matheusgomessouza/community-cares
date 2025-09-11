@@ -56,13 +56,14 @@ export async function postAchievements({
   }
 }
 
-export async function postAuthenticateUser(code: string) {
+export async function postAuthenticateUser(code: string, codeVerifier: string) {
   try {
     const response =
       await communityCaresServerInstance.post<interfaces.SuccessGithubResponseProps>(
         `/authenticate`,
         {
           code: code,
+          code_verifier: codeVerifier,
           env: "mobile",
         }
       );
