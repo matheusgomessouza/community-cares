@@ -12,7 +12,7 @@ import { UsabilityProvider } from "@contexts/usability";
 import { AuthenticationProvider } from "@contexts/authentication";
 
 export default function App() {
-  let [fontsLoaded, fontError] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Shrikhand_400Regular,
     Montserrat_200ExtraLight,
     Montserrat_300Light_Italic,

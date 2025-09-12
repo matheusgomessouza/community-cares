@@ -11,26 +11,30 @@ export default function Redirect() {
   const { isUserAuthenticated } = useContext(AuthenticationContext);
   const { setForeignUser } = useContext(UsabilityContext);
   const [hasToken, setHasToken] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function getUserToken() {
     try {
       const response = await SecureStore.getItemAsync("github-token");
-      if (response) setHasToken(true);
+      console.log(response);
+      setHasToken(!!response);
     } catch (error) {
-      return error;
+      console.error("Error retrieving token:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function getUserCountry() {
     try {
       const countryCode = await Cellular.getIsoCountryCodeAsync();
-
       if (countryCode && countryCode !== "br") {
         setForeignUser(true);
       }
     } catch (error) {
       console.error(
-        "Unable to retrieve MCC (Mobile Country Code) /getUserCountry", error
+        "Unable to retrieve MCC (Mobile Country Code) /getUserCountry",
+        error
       );
     }
   }
@@ -40,9 +44,9 @@ export default function Redirect() {
     getUserCountry();
   }, [isUserAuthenticated]);
 
-  return hasToken || (isUserAuthenticated && hasToken) ? (
-    <MapScreen />
-  ) : (
-    <SignInScreen />
-  );
+  if (isLoading) {
+    return null;
+  }
+
+  return hasToken ? <MapScreen /> : <SignInScreen />;
 }

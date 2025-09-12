@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "expo-router";
 import { useContext, useEffect } from "react";
 import {
   Pressable,
@@ -39,12 +40,11 @@ export default function SignInScreen() {
     showSignInError,
     setShowSignInError,
     isAuthenticating,
+    isUserAuthenticated,
   } = useContext(AuthenticationContext);
   const [request, response, signInWithGithub] = useAuthRequest(
     {
-      clientId: env.EXPO_PUBLIC_CLIENT_ID
-        ? env.EXPO_PUBLIC_CLIENT_ID
-        : "",
+      clientId: env.EXPO_PUBLIC_CLIENT_ID ? env.EXPO_PUBLIC_CLIENT_ID : "",
       scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",
@@ -53,6 +53,8 @@ export default function SignInScreen() {
     discovery
   );
   const sv = useSharedValue<number>(0);
+  const router = useRouter();
+
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
@@ -70,6 +72,12 @@ export default function SignInScreen() {
       -1 // -1 means infinite loop
     );
   }, []);
+
+  useEffect(() => {
+    if (isUserAuthenticated) {
+      router.navigate("/map");
+    }
+  }, [isUserAuthenticated]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${sv.value * 360}deg` }],
@@ -118,16 +126,14 @@ export default function SignInScreen() {
             )}
           </TouchableOpacity>
           <TouchableOpacity
-            disabled={isAuthenticating}
-            style={styles.signInButton}
+            disabled={true}
+            style={[styles.signInButton, { opacity: 0.7 }]}
             onPress={() => {}}
           >
             {isAuthenticating ? (
               <>
-                <Text style={styles.textSignButton}>Authenticating</Text>
-                <Animated.View style={animatedStyle}>
-                  <LoadingIcon name="dots-circle" size={16} color="#FFFF" />
-                </Animated.View>
+                <Text style={styles.textSignButton}>Google</Text>
+                <GoogleIcon name="google" size={16} color="#FFFF" />
               </>
             ) : (
               <>
