@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { router } from "expo-router";
 import { Image } from "expo-image";
-import { StatusBar } from "expo-status-bar";
 import * as SecureStore from "expo-secure-store";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,7 +17,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
       <View style={styles.header}>
         <Icon
           name="chevron-left"

@@ -20,7 +20,12 @@
       }
     },
     "android": {
-      "package": "com.community_cares",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyD6zdbi8eYO_ZJbYyyse3N9UOEQHmiUIl4"
+        }
+      },
+      "package": "com.communitycares",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#EB841A"

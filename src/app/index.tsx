@@ -16,7 +16,6 @@ export default function Redirect() {
   async function getUserToken() {
     try {
       const response = await SecureStore.getItemAsync("github-token");
-      console.log(response);
       setHasToken(!!response);
     } catch (error) {
       console.error("Error retrieving token:", error);
@@ -47,6 +46,6 @@ export default function Redirect() {
   if (isLoading) {
     return null;
   }
-
+  console.log("hasToken", hasToken);
   return hasToken ? <MapScreen /> : <SignInScreen />;
 }

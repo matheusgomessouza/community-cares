@@ -16,16 +16,31 @@ export async function getUserData(): Promise<
   try {
     const deviceToken = await SecureStore.getItemAsync("github-token");
 
-    if (deviceToken) {
-      const { data } = await githubApiInstance.get("/user", {
+    if (!deviceToken) {
+      console.log("No GitHub token found in SecureStore.");
+      return undefined;
+    }
+
+    const { data } = await githubApiInstance.get<interfaces.UserDataProps>(
+      "/user",
+      {
         headers: {
           Authorization: `Bearer ${deviceToken}`,
         },
-      });
+      }
+    );
 
-      return data;
-    }
+    return data;
   } catch (error) {
-    console.error("Unable to retrieve user data [getUserData]", error);
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Axios error fetching user data: ${error.response?.status} ${error.message}`
+      );
+    } else {
+      console.error("Unexpected error in getUserData:", error);
+    }
+    // Depending on application needs, you might want to re-throw the error
+    // throw error;
+    return undefined;
   }
 }

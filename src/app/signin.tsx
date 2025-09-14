@@ -48,10 +48,13 @@ export default function SignInScreen() {
       scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",
+        // @ts-expect-error: useProxy is not typed in makeRedirectUri options but required for Expo Go
+        useProxy: true,
       }),
     },
     discovery
   );
+ 
   const sv = useSharedValue<number>(0);
   const router = useRouter();
 
