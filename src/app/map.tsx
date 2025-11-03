@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import { AppleMaps, GoogleMaps } from "expo-maps";
+import { GoogleMapsMarker as GoogleMapsViewProps} from "expo-maps/build/google/GoogleMaps.types";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Platform, StyleSheet, Pressable, Text, View } from "react-native";
 import MaterialCommunityIcon from "@expo/vector-icons/MaterialCommunityIcons";
@@ -11,25 +12,18 @@ import UsabilityContext from "@contexts/usability";
 import * as interfaces from "@interfaces/index";
 import AuthenticationContext from "@contexts/authentication";
 import * as Services from "@services/index";
-// import { IconProps } from "@expo/vector-icons/build/createIconSet";
 
 export default function MapScreen() {
-  const { showFilter, setShowFilter } =
-    useContext(UsabilityContext);
+  const { showFilter, setShowFilter } = useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-  const [locations, setLocations] = useState<Array<interfaces.LocationsProps>>(
+  const [locations, setLocations] = useState<GoogleMapsViewProps[]>(
     []
   );
-  console.log("locations", locations);
   const mapRef = useRef(null);
-  // const [showDirection, setShowDirection] =
-  //   useState<interfaces.DestinationDirectionProps>(
-  //     {} as interfaces.DestinationDirectionProps
-  //   );
 
   async function requestLocationPermission() {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -52,7 +46,16 @@ export default function MapScreen() {
   async function getAllLocations() {
     try {
       const response = await Services.CommunityCaresService.getLocations();
-      setLocations(response?.data);
+      const locationsMarkers: GoogleMapsViewProps[] = response?.data.map((loc: interfaces.LocationsProps) => ({
+        id: String(loc.id),
+        title: loc.name,
+        snippet: loc.address,
+        coordinates: {
+          latitude: parseFloat(loc.coords.latitude),
+          longitude: parseFloat(loc.coords.longitude),
+        },
+      }));
+      setLocations(locationsMarkers);
     } catch (error) {
       console.error("Unable to retrieve Locations /getAllLocations", error);
     }
@@ -88,21 +91,6 @@ export default function MapScreen() {
       }
     );
   }
-
-  // function defineMarkerIcon(locationType: string): IconProps<string> {
-  //   switch (locationType) {
-  //     case interfaces.EstablishmentTypeProps.CommunityKitchen:
-  //       return { name: "countertop" };
-  //     case interfaces.EstablishmentTypeProps.SolidarityKitchen:
-  //       return { name: "silverware-spoon" };
-  //     case interfaces.EstablishmentTypeProps.Shelter:
-  //       return { name: "home" };
-  //     case interfaces.EstablishmentTypeProps.Hospital:
-  //       return { name: "hospital-box" };
-  //     default:
-  //       return { name: "marker" };
-  //   }
-  // }
 
   useEffect(() => {
     requestLocationPermission();
@@ -177,8 +165,8 @@ export default function MapScreen() {
             },
           }}
           style={StyleSheet.absoluteFill}
+          markers={locations}
         />
-        {}
       </>
     );
   } else {

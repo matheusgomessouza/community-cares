@@ -46,6 +46,5 @@ export default function Redirect() {
   if (isLoading) {
     return null;
   }
-  console.log("hasToken", hasToken);
   return hasToken ? <MapScreen /> : <SignInScreen />;
 }
