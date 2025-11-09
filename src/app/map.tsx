@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import { AppleMaps, GoogleMaps } from "expo-maps";
-import { GoogleMapsMarker as GoogleMapsViewProps} from "expo-maps/build/google/GoogleMaps.types";
+import { GoogleMapsMarker as GoogleMapsViewProps } from "expo-maps/build/google/GoogleMaps.types";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Platform, StyleSheet, Pressable, Text, View } from "react-native";
 import MaterialCommunityIcon from "@expo/vector-icons/MaterialCommunityIcons";
@@ -20,41 +20,47 @@ export default function MapScreen() {
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-  const [locations, setLocations] = useState<GoogleMapsViewProps[]>(
-    []
-  );
+  const [locations, setLocations] = useState<GoogleMapsViewProps[]>([]);
   const mapRef = useRef(null);
 
   async function requestLocationPermission() {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-
-    if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-      return;
-    }
-
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: 4,
-    });
-
-    if (location) setLocation(location);
-    if (!location.coords.longitude && !location.coords.latitude) {
-      setErrorMsg("Error during location calculation");
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+  
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+  
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.LocationAccuracy.Highest,
+          timeInterval: 1000,
+          distanceInterval: 1,
+        },
+        (location) => {
+          setLocation(location);
+        }
+      );
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setErrorMsg("Not authorized to use location services.");
     }
   }
 
   async function getAllLocations() {
     try {
       const response = await Services.CommunityCaresService.getLocations();
-      const locationsMarkers: GoogleMapsViewProps[] = response?.data.map((loc: interfaces.LocationsProps) => ({
-        id: String(loc.id),
-        title: loc.name,
-        snippet: loc.address,
-        coordinates: {
-          latitude: parseFloat(loc.coords.latitude),
-          longitude: parseFloat(loc.coords.longitude),
-        },
-      }));
+      const locationsMarkers: GoogleMapsViewProps[] =
+        response?.data.payload.map((loc: interfaces.LocationsProps) => ({
+          id: String(loc.id),
+          title: loc.name,
+          snippet: loc.address,
+          coordinates: {
+            latitude: parseFloat(loc.coords.latitude),
+            longitude: parseFloat(loc.coords.longitude),
+          },
+        }));
       setLocations(locationsMarkers);
     } catch (error) {
       console.error("Unable to retrieve Locations /getAllLocations", error);
@@ -79,36 +85,10 @@ export default function MapScreen() {
       });
   }
 
-  function handleCenterLocation() {
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.LocationAccuracy.Highest,
-        timeInterval: 1000,
-        distanceInterval: 1,
-      },
-      (response) => {
-        setLocation(response);
-      }
-    );
-  }
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, [location]);
-
   useEffect(() => {
     getAllLocations();
     getGitHubUserData();
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.LocationAccuracy.Highest,
-        timeInterval: 1000,
-        distanceInterval: 1,
-      },
-      (response) => {
-        setLocation(response);
-      }
-    );
+    requestLocationPermission();
   }, []);
 
   if (Platform.OS === "ios") {
@@ -125,7 +105,7 @@ export default function MapScreen() {
         {showFilter && <MenuOverlayComponent />}
         <Pressable
           style={styles.locationCenterButton}
-          onPress={() => handleCenterLocation()}
+          onPress={() => {}}
         >
           <MaterialCommunityIcon
             size={24}

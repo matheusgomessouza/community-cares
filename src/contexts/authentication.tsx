@@ -32,7 +32,6 @@ export function AuthenticationProvider({
       }
 
       const savedToken = await SecureStore.getItemAsync("github-token");
-
       if (savedToken) setIsUserAuthenticated(true);
     } catch (error) {
       setIsAuthenticating(false);
