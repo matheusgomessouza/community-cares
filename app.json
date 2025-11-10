@@ -13,7 +13,9 @@
       "resizeMode": "cover",
       "backgroundColor": "#EB841A"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "config": {
         "usesNonExemptEncryption": false
@@ -22,7 +24,7 @@
     "android": {
       "config": {
         "googleMaps": {
-          "apiKey": "${EXPO_PUBLIC_GOOGLE_API_KEY}"
+          "apiKey": "AIzaSyD6zdbi8eYO_ZJbYyyse3N9UOEQHmiUIl4"
         }
       },
       "package": "com.communitycares",
@@ -45,7 +47,8 @@
           "requestLocationPermission": true,
           "locationPermission": "Allow $(PRODUCT_NAME) to use your location"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "githubUrl": "https://github.com/matheusgomessouza/community-cares",
     "extra": {
