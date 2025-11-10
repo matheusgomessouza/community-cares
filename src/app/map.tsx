@@ -22,6 +22,7 @@ export default function MapScreen() {
   );
   const [locations, setLocations] = useState<GoogleMapsViewProps[]>([]);
   const mapRef = useRef(null);
+  const locationSubscriptionRef = useRef<Location.LocationSubscription | null>(null);
 
   async function requestLocationPermission() {
     try {
@@ -32,7 +33,12 @@ export default function MapScreen() {
         return;
       }
   
-      Location.watchPositionAsync(
+      // Clean up any existing subscription before creating a new one
+      if (locationSubscriptionRef.current) {
+        locationSubscriptionRef.current.remove();
+      }
+  
+      const subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.LocationAccuracy.Highest,
           timeInterval: 1000,
@@ -42,6 +48,8 @@ export default function MapScreen() {
           setLocation(location);
         }
       );
+      
+      locationSubscriptionRef.current = subscription;
     } catch (error) {
       console.error("Error requesting location permission:", error);
       setErrorMsg("Not authorized to use location services.");
@@ -89,6 +97,13 @@ export default function MapScreen() {
     getAllLocations();
     getGitHubUserData();
     requestLocationPermission();
+
+    // Cleanup function to remove the location subscription when component unmounts
+    return () => {
+      if (locationSubscriptionRef.current) {
+        locationSubscriptionRef.current.remove();
+      }
+    };
   }, []);
 
   if (Platform.OS === "ios") {
