@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
 import { useFonts, Shrikhand_400Regular } from "@expo-google-fonts/shrikhand";
 import {
   Montserrat_200ExtraLight,
@@ -29,6 +30,7 @@ export default function App() {
   return (
       <AuthenticationProvider>
         <UsabilityProvider>
+          <StatusBar />
           <Stack
             screenOptions={{
               headerShown: false,

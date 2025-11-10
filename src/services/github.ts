@@ -17,7 +17,6 @@ export async function getUserData(): Promise<
     const deviceToken = await SecureStore.getItemAsync("github-token");
 
     if (!deviceToken) {
-      console.log("No GitHub token found in SecureStore.");
       return undefined;
     }
 

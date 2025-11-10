@@ -60,7 +60,7 @@ export async function postAuthenticateUser(code: string, codeVerifier: string) {
   try {
     const response =
       await communityCaresServerInstance.post<interfaces.SuccessGithubResponseProps>(
-        `/authenticate`,
+        `/users/authenticate/github`,
         {
           code: code,
           code_verifier: codeVerifier,
