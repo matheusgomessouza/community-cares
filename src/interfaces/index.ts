@@ -93,4 +93,5 @@ export interface UserAchievementServiceProps {
 export interface FrequentlyAskedQuestionProps {
   questionLabel: string;
   questionAnswer: string;
+  iconName?: string;
 }

@@ -1,16 +1,19 @@
 import { StyleSheet, View, Text } from "react-native";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import * as interfaces from "@interfaces/index";
+import { ComponentProps } from "react";
 
 export function FrequentlyAskedQuestionCardComponent({
   questionLabel,
   questionAnswer,
+  iconName = "help",
 }: interfaces.FrequentlyAskedQuestionProps) {
   return (
     <View style={styles.answerContainer}>
       <View style={styles.icon}>
-        <Text style={styles.symbol}>?</Text>
+        <Icon name={iconName as ComponentProps<typeof Icon>['name']} size={32} color="#C76E16" />
       </View>
-      <View>
+      <View style={styles.textContainer}>
         <Text style={styles.answerLabel}>{questionLabel}</Text>
         <Text style={styles.answerText}>{questionAnswer}</Text>
       </View>
@@ -21,45 +24,35 @@ export function FrequentlyAskedQuestionCardComponent({
 const styles = StyleSheet.create({
   icon: {
     backgroundColor: "#FFF",
-    borderRadius: 100,
+    borderRadius: 30,
     width: 60,
     height: 60,
     alignItems: "center",
     justifyContent: "center",
   },
-  symbol: {
-    color: "#C76E16",
-    fontFamily: "Shrikhand_400Regular",
-    fontSize: 32,
-    width: "100%",
-    textAlign: "center",
-  },
   answerContainer: {
-    backgroundColor: "rgba(199, 110, 22, 0.4)",
+    backgroundColor: "#EBCFB2",
     width: "100%",
     borderRadius: 20,
-    minHeight: 100,
-    maxHeight: "auto",
-    height: "auto",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginBottom: 40,
+    padding: 20,
+    marginBottom: 20,
+  },
+  textContainer: {
+    flex: 1,
   },
   answerLabel: {
-    color: "#C76E16",
-    fontSize: 12,
-    fontFamily: "Montserrat_700Bold"
+    color: "#000",
+    fontSize: 14,
+    fontFamily: "Montserrat_700Bold",
+    marginBottom: 4,
   },
   answerText: {
-    flexWrap: "wrap",
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: "Montserrat_400Regular",
-    width: "75%",
-    textAlign: "justify",
-    color: "#9E5811",
+    color: "#333",
+    lineHeight: 18,
   },
 });
