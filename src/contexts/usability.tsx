@@ -10,6 +10,7 @@ export function UsabilityProvider({
 }: interfaces.UsabilityProviderProps) {
   const [showFilter, setShowFilter] = useState(false);
   const [foreignUser, setForeignUser] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   return (
     <UsabilityContext.Provider
@@ -18,6 +19,8 @@ export function UsabilityProvider({
         setShowFilter,
         foreignUser,
         setForeignUser,
+        selectedFilters,
+        setSelectedFilters,
       }}
     >
       {children}

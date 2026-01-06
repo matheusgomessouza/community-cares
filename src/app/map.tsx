@@ -1,38 +1,52 @@
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  ComponentRef,
+} from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import { AppleMaps, GoogleMaps } from "expo-maps";
 import { GoogleMapsMarker as GoogleMapsViewProps } from "expo-maps/build/google/GoogleMaps.types";
-import React, { useContext, useEffect, useState, useRef } from "react";
 import { Platform, StyleSheet, Pressable, Text, View } from "react-native";
 import MaterialCommunityIcon from "@expo/vector-icons/MaterialCommunityIcons";
 
-import { MenuOverlayComponent } from "@components/MenuOverlayComponent";
+import { FilterComponent } from "@components/FilterComponent";
 import UsabilityContext from "@contexts/usability";
 import * as interfaces from "@interfaces/index";
 import AuthenticationContext from "@contexts/authentication";
 import * as Services from "@services/index";
 
 export default function MapScreen() {
-  const { showFilter, setShowFilter } = useContext(UsabilityContext);
+  const { showFilter, setShowFilter, selectedFilters } =
+    useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
   const [locations, setLocations] = useState<GoogleMapsViewProps[]>([]);
-  const mapRef = useRef(null);
+  const [cameraPosition, setCameraPosition] = useState<{
+    zoom: number;
+    coordinates: { latitude: number; longitude: number };
+  }>({
+    zoom: 12,
+    coordinates: { latitude: 37.78825, longitude: -122.4324 },
+  });
+  const mapRef = useRef<ComponentRef<typeof GoogleMaps.View>>(null);
 
   async function requestLocationPermission() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-  
+
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
         return;
       }
-  
-      Location.watchPositionAsync(
+
+      await Location.watchPositionAsync(
         {
           accuracy: Location.LocationAccuracy.Highest,
           timeInterval: 1000,
@@ -40,6 +54,18 @@ export default function MapScreen() {
         },
         (location) => {
           setLocation(location);
+          if (
+            !cameraPosition.coordinates.latitude ||
+            cameraPosition.coordinates.latitude === 37.78825
+          ) {
+            setCameraPosition({
+              zoom: 12,
+              coordinates: {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              },
+            });
+          }
         }
       );
     } catch (error) {
@@ -51,8 +77,16 @@ export default function MapScreen() {
   async function getAllLocations() {
     try {
       const response = await Services.CommunityCaresService.getLocations();
-      const locationsMarkers: GoogleMapsViewProps[] =
-        response?.data.payload.map((loc: interfaces.LocationsProps) => ({
+      let filteredLocations = response?.data.payload;
+
+      if (selectedFilters.length > 0) {
+        filteredLocations = filteredLocations.filter(
+          (loc: interfaces.LocationsProps) => selectedFilters.includes(loc.type)
+        );
+      }
+
+      const locationsMarkers: GoogleMapsViewProps[] = filteredLocations.map(
+        (loc: interfaces.LocationsProps) => ({
           id: String(loc.id),
           title: loc.name,
           snippet: loc.address,
@@ -60,7 +94,8 @@ export default function MapScreen() {
             latitude: parseFloat(loc.coords.latitude),
             longitude: parseFloat(loc.coords.longitude),
           },
-        }));
+        })
+      );
       setLocations(locationsMarkers);
     } catch (error) {
       console.error("Unable to retrieve Locations /getAllLocations", error);
@@ -91,6 +126,10 @@ export default function MapScreen() {
     requestLocationPermission();
   }, []);
 
+  useEffect(() => {
+    getAllLocations();
+  }, [selectedFilters]);
+
   if (Platform.OS === "ios") {
     return <AppleMaps.View style={{ flex: 1 }} />;
   } else if (Platform.OS === "android") {
@@ -102,17 +141,37 @@ export default function MapScreen() {
 
     return (
       <>
-        {showFilter && <MenuOverlayComponent />}
+        {showFilter && <FilterComponent />}
         <Pressable
           style={styles.locationCenterButton}
-          onPress={() => {}}
+          onPress={() => {
+            if (location) {
+              setCameraPosition({
+                zoom: 12.0001,
+                coordinates: {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                },
+              });
+              setTimeout(() => {
+                setCameraPosition({
+                  zoom: 12,
+                  coordinates: {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  },
+                });
+              }, 50);
+            }
+          }}
         >
           <MaterialCommunityIcon
             size={24}
-            color="#EB841A"
+            color="#C76E16"
             name="navigation-variant"
           />
         </Pressable>
+        
         <View style={styles.navigationComponent}>
           <Pressable
             onPress={() => {
@@ -132,18 +191,13 @@ export default function MapScreen() {
               setShowFilter(true);
             }}
           >
-            <MaterialCommunityIcon name="magnify" size={24} color="#FFFF" />
+            <MaterialCommunityIcon name="filter" size={24} color="#FFFF" />
           </Pressable>
         </View>
+        
         <GoogleMaps.View
           ref={mapRef}
-          cameraPosition={{
-            zoom: 12,
-            coordinates: {
-              latitude: location?.coords.latitude || 37.78825,
-              longitude: location?.coords.longitude || -122.4324,
-            },
-          }}
+          cameraPosition={cameraPosition}
           style={StyleSheet.absoluteFill}
           markers={locations}
         />
@@ -174,7 +228,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: "80%",
     height: 56,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFF8F0",
     borderRadius: 25,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -199,10 +253,10 @@ const styles = StyleSheet.create({
   },
   navigationComponentBrand: {
     fontFamily: "Montserrat_900Black",
-    color: "#EB841A",
+    color: "#C76E16",
   },
   navigationButton: {
-    backgroundColor: "#EB841A",
+    backgroundColor: "#C76E16",
     borderRadius: 100,
     padding: 8,
     position: "relative",
@@ -219,7 +273,7 @@ const styles = StyleSheet.create({
   },
   locationCenterButton: {
     borderRadius: 100,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFF8F0",
     position: "absolute",
     bottom: 128,
     left: 24,

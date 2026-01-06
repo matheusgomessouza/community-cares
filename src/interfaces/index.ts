@@ -3,6 +3,8 @@ export interface UsabilityContextProps {
   setShowFilter: (value: boolean) => void;
   foreignUser: boolean;
   setForeignUser: (value: boolean) => void;
+  selectedFilters: string[];
+  setSelectedFilters: (value: string[]) => void;
 }
 
 export type UsabilityProviderProps = {

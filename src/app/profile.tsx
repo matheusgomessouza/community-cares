@@ -121,7 +121,13 @@ export default function ProfileScreen() {
                 <View style={styles.achievementIconContainer}>
                   <Icon name={item.icon} size={32} color="#C76E16" />
                 </View>
-                <Text style={styles.achievementTitle}>{item.title}</Text>
+                <Text
+                  style={styles.achievementTitle}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.title}
+                </Text>
                 <Text style={styles.achievementDate}>{item.date}</Text>
               </View>
             ))}
@@ -243,8 +249,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userInfo: {
-    color: "#666",
-    fontFamily: "Montserrat_400Regular",
+    color: "#C76E16",
+    fontFamily: "Montserrat_700Bold",
     fontSize: 12,
   },
   sectionContainer: {
@@ -265,12 +271,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 16,
-    color: "#333",
+    color: "#C76E16",
   },
   sectionSubtitle: {
-    fontFamily: "Montserrat_400Regular",
+    fontFamily: "Montserrat_700Bold",
     fontSize: 12,
-    color: "#666",
+    color: "#C76E16",
   },
   achievementsScroll: {
     flexDirection: "row",
@@ -295,7 +301,7 @@ const styles = StyleSheet.create({
     fontFamily: "Montserrat_700Bold",
     fontSize: 12,
     textAlign: "center",
-    color: "#333",
+    color: "#C76E16",
     marginBottom: 4,
   },
   achievementDate: {
@@ -322,7 +328,7 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 14,
-    color: "#000",
+    color: "#C76E16",
     marginBottom: 4,
   },
   activityDate: {
@@ -363,7 +369,7 @@ const styles = StyleSheet.create({
   impactValue: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 20,
-    color: "#000",
+    color: "#C76E16",
   },
   impactDivider: {
     width: 1,

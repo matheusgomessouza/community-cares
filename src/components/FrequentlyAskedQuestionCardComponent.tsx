@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   answerLabel: {
-    color: "#000",
+    color: "#C76E16",
     fontSize: 14,
     fontFamily: "Montserrat_700Bold",
     marginBottom: 4,
