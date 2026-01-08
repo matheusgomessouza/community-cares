@@ -1,14 +1,20 @@
 {
   "compilerOptions": {
-    "baseUrl": "src/",
+    "baseUrl": "./src/",
     "strict": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "module": "node16",
+    "moduleResolution": "node16",
     "paths": {
-      "@components": ["/src/components/"]
+      "@components/*": ["components/*"],
+      "@services/*": ["services/*"],
+      "@contexts/*": ["contexts/*"],
+      "@hooks/*": ["hooks/*"],
+      "@interfaces/*": ["interfaces/*"]
     }
   },
   "extends": "@tsconfig/react-native/tsconfig.json"

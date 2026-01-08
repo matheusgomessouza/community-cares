@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
 import { useFonts, Shrikhand_400Regular } from "@expo-google-fonts/shrikhand";
 import {
   Montserrat_200ExtraLight,
@@ -8,11 +9,11 @@ import {
   Montserrat_800ExtraBold,
   Montserrat_900Black,
 } from "@expo-google-fonts/montserrat";
-import { UsabilityProvider } from "../contexts/usability";
-import { AuthenticationProvider } from "../contexts/authentication";
+import { UsabilityProvider } from "@contexts/usability";
+import { AuthenticationProvider } from "@contexts/authentication";
 
 export default function App() {
-  let [fontsLoaded, fontError] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Shrikhand_400Regular,
     Montserrat_200ExtraLight,
     Montserrat_300Light_Italic,
@@ -29,6 +30,7 @@ export default function App() {
   return (
       <AuthenticationProvider>
         <UsabilityProvider>
+          <StatusBar />
           <Stack
             screenOptions={{
               headerShown: false,

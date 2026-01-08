@@ -3,11 +3,14 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import MenuIcon from "react-native-vector-icons/MaterialIcons";
 import UsabilityContext from "../contexts/usability";
 
-export default function MenuIconComponent() {
+export function MenuIconComponent() {
   const { showFilter, setShowFilter } = useContext(UsabilityContext);
 
   return (
     <TouchableOpacity
+      accessibilityLabel="press-to-show-filter"
+      testID="press-to-show-filter"
+      accessibilityRole="button"
       style={styles.buttonContainer}
       onPress={() => setShowFilter(!showFilter)}
     >

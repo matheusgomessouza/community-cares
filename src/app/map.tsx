@@ -1,79 +1,109 @@
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  ComponentRef,
+} from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import * as Location from "expo-location";
-import MapView, {
-  Marker,
-  enableLatestRenderer,
-  Callout,
-} from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
-import React, { useContext, useEffect, useState, useRef } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import SearchIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import NavigationVariantIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { AppleMaps, GoogleMaps } from "expo-maps";
+import { GoogleMapsMarker as GoogleMapsViewProps } from "expo-maps/build/google/GoogleMaps.types";
+import { Platform, StyleSheet, Pressable, Text, View } from "react-native";
+import MaterialCommunityIcon from "@expo/vector-icons/MaterialCommunityIcons";
 
-import MenuOverlayComponent from "../components/MenuOverlay";
-import UsabilityContext from "../contexts/usability";
-import { getUserData } from "services/gituhb-api";
-import * as interfaces from "../interfaces";
-import AuthenticationContext from "contexts/authentication";
-import { getLocations } from "services/database";
-import AchievementToastComponent from "components/AchievementToastComponent";
+import { FilterComponent } from "@components/FilterComponent";
+import UsabilityContext from "@contexts/usability";
+import * as interfaces from "@interfaces/index";
+import AuthenticationContext from "@contexts/authentication";
+import * as Services from "@services/index";
 
 export default function MapScreen() {
-  enableLatestRenderer();
-  const { showFilter, setShowFilter, foreignUser } =
+  const { showFilter, setShowFilter, selectedFilters } =
     useContext(UsabilityContext);
   const { profileData, setProfileInfo } = useContext(AuthenticationContext);
   const [errorMsg, setErrorMsg] = useState<null | string>(null);
   const [location, setLocation] = useState<null | Location.LocationObject>(
     null
   );
-  const [locations, setLocations] = useState<Array<interfaces.LocationsProps>>(
-    []
-  );
-  const mapRef = useRef<MapView>(null);
-  const [showDirection, setShowDirection] =
-    useState<interfaces.DestinationDirectionProps>(
-      {} as interfaces.DestinationDirectionProps
-    );
-  const [achievementUnlocked, setAchievementUnlocked] =
-    useState<interfaces.AchievementActionProps>({
-      show: false,
-      type: "",
-    });
+  const [locations, setLocations] = useState<GoogleMapsViewProps[]>([]);
+  const [cameraPosition, setCameraPosition] = useState<{
+    zoom: number;
+    coordinates: { latitude: number; longitude: number };
+  }>({
+    zoom: 12,
+    coordinates: { latitude: 37.78825, longitude: -122.4324 },
+  });
+  const mapRef = useRef<ComponentRef<typeof GoogleMaps.View>>(null);
 
   async function requestLocationPermission() {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
-      return;
-    }
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
 
-    let location = await Location.getCurrentPositionAsync({
-      accuracy: 4,
-    });
-
-    if (location) setLocation(location);
-    if (!location.coords.longitude && !location.coords.latitude) {
-      setErrorMsg("Error during location calculation");
+      await Location.watchPositionAsync(
+        {
+          accuracy: Location.LocationAccuracy.Highest,
+          timeInterval: 1000,
+          distanceInterval: 1,
+        },
+        (location) => {
+          setLocation(location);
+          if (
+            !cameraPosition.coordinates.latitude ||
+            cameraPosition.coordinates.latitude === 37.78825
+          ) {
+            setCameraPosition({
+              zoom: 12,
+              coordinates: {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              },
+            });
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+      setErrorMsg("Not authorized to use location services.");
     }
   }
 
   async function getAllLocations() {
     try {
-      const response = await getLocations();
-      setLocations(response?.data);
+      const response = await Services.CommunityCaresService.getLocations();
+      let filteredLocations = response?.data.payload;
+
+      if (selectedFilters.length > 0) {
+        filteredLocations = filteredLocations.filter(
+          (loc: interfaces.LocationsProps) => selectedFilters.includes(loc.type)
+        );
+      }
+
+      const locationsMarkers: GoogleMapsViewProps[] = filteredLocations.map(
+        (loc: interfaces.LocationsProps) => ({
+          id: String(loc.id),
+          title: loc.name,
+          snippet: loc.address,
+          coordinates: {
+            latitude: parseFloat(loc.coords.latitude),
+            longitude: parseFloat(loc.coords.longitude),
+          },
+        })
+      );
+      setLocations(locationsMarkers);
     } catch (error) {
       console.error("Unable to retrieve Locations /getAllLocations", error);
     }
   }
 
   async function getGitHubUserData() {
-    await getUserData()
+    await Services.GitHubService.getUserData()
       .then((res: interfaces.UserDataProps | undefined) => {
         if (res) {
           setProfileInfo({
@@ -90,252 +120,92 @@ export default function MapScreen() {
       });
   }
 
-  function handleCenterLocation() {
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.LocationAccuracy.Highest,
-        timeInterval: 1000,
-        distanceInterval: 1,
-      },
-      (response) => {
-        setLocation(response);
-        mapRef.current?.animateCamera({
-          center: response.coords,
-        });
-      }
-    );
-  }
-
-  function defineMarkerIcon(locationType: string): string {
-    switch (locationType) {
-      case interfaces.EstablishmentTypeProps.CommunityKitchen:
-        return "countertop";
-      case interfaces.EstablishmentTypeProps.SolidarityKitchen:
-        return "silverware-spoon";
-      case interfaces.EstablishmentTypeProps.Shelter:
-        return "home";
-      case interfaces.EstablishmentTypeProps.Hospital:
-        return "hospital-box";
-      default:
-        return "";
-    }
-  }
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, [location]);
-
   useEffect(() => {
     getAllLocations();
     getGitHubUserData();
-    Location.watchPositionAsync(
-      {
-        accuracy: Location.LocationAccuracy.Highest,
-        timeInterval: 1000,
-        distanceInterval: 1,
-      },
-      (response) => {
-        setLocation(response);
-        mapRef.current?.animateCamera({
-          center: response.coords,
-        });
-      }
-    );
+    requestLocationPermission();
   }, []);
 
   useEffect(() => {
-    if (achievementUnlocked.show === true) {
-      setTimeout(
-        () =>
-          setAchievementUnlocked({
-            ...achievementUnlocked,
-            show: false,
-            type: "",
-          }),
-        2000
-      );
+    getAllLocations();
+  }, [selectedFilters]);
+
+  if (Platform.OS === "ios") {
+    return <AppleMaps.View style={{ flex: 1 }} />;
+  } else if (Platform.OS === "android") {
+    if (typeof errorMsg === "string") {
+      <View style={styles.errorMessageWrapper}>
+        <Text style={styles.errorMessageText}>{errorMsg}</Text>
+      </View>;
     }
-  }, [achievementUnlocked.show]);
 
-  return (
-    <View style={styles.container}>
-      <StatusBar style="dark" translucent />
-
-      {showFilter && <MenuOverlayComponent />}
-      <View style={styles.navigationComponent}>
+    return (
+      <>
+        {showFilter && <FilterComponent />}
         <Pressable
+          style={styles.locationCenterButton}
           onPress={() => {
-            router.navigate("profile");
+            if (location) {
+              setCameraPosition({
+                zoom: 12.0001,
+                coordinates: {
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                },
+              });
+              setTimeout(() => {
+                setCameraPosition({
+                  zoom: 12,
+                  coordinates: {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  },
+                });
+              }, 50);
+            }
           }}
-          style={styles.navigationButton}
         >
-          <Image
-            source={profileData?.avatar_url}
-            style={styles.profilePicture}
+          <MaterialCommunityIcon
+            size={24}
+            color="#C76E16"
+            name="navigation-variant"
           />
         </Pressable>
-        <Text style={styles.navigationComponentBrand}>Community Cares</Text>
-        <Pressable
-          style={styles.navigationButton}
-          onPress={() => {
-            setShowFilter(true);
-          }}
-        >
-          <SearchIcon name="magnify" size={24} color="#FFFF" />
-        </Pressable>
-      </View>
-
-      {achievementUnlocked.show && (
-        <AchievementToastComponent
-          iconName={
-            achievementUnlocked.type === "crosshairs-gps"
-              ? interfaces.AchievementsProps.TRACE_LOCATION
-              : interfaces.AchievementsProps.KNOW_LOCATION_INFO
-          }
-          achievementDescription={
-            achievementUnlocked.type === "crosshairs-gps"
-              ? "Hey! Do you wanna a bite?"
-              : "Hmmm, show me more details about this!"
-          }
-        />
-      )}
-
-      <Pressable
-        style={styles.locationCenterButton}
-        onPress={() => handleCenterLocation()}
-      >
-        <NavigationVariantIcon
-          size={24}
-          color="#EB841A"
-          name="navigation-variant"
-        />
-      </Pressable>
-
-      {typeof errorMsg === "string" ? (
-        <View style={styles.errorMessageWrapper}>
-          <Text style={styles.errorMessageText}>{errorMsg}</Text>
+        
+        <View style={styles.navigationComponent}>
+          <Pressable
+            onPress={() => {
+              router.navigate("profile");
+            }}
+            style={styles.navigationButton}
+          >
+            <Image
+              source={profileData?.avatar_url}
+              style={styles.profilePicture}
+            />
+          </Pressable>
+          <Text style={styles.navigationComponentBrand}>Community Cares</Text>
+          <Pressable
+            style={styles.navigationButton}
+            onPress={() => {
+              setShowFilter(true);
+            }}
+          >
+            <MaterialCommunityIcon name="filter" size={24} color="#FFFF" />
+          </Pressable>
         </View>
-      ) : (
-        <>
-          {location ? (
-            <MapView
-              ref={mapRef}
-              region={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-                latitudeDelta: 0.005,
-                longitudeDelta: 0.005,
-              }}
-              style={styles.map}
-            >
-              {process.env.EXPO_PUBLIC_GOOGLE_API_KEY && showDirection.show && (
-                <MapViewDirections
-                  origin={location.coords}
-                  destination={{
-                    latitude: Number(
-                      locations[showDirection.directionIndex].coords.latitude
-                    ),
-                    longitude: Number(
-                      locations[showDirection.directionIndex].coords.longitude
-                    ),
-                  }}
-                  apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY}
-                  strokeWidth={4}
-                  strokeColor="orange"
-                />
-              )}
-              <Marker coordinate={location.coords} title="You are here" />
-              {locations.map((marker, index) => (
-                <Marker
-                  pinColor="#EB841A"
-                  key={index}
-                  coordinate={{
-                    latitude: Number(marker.coords.latitude),
-                    longitude: Number(marker.coords.longitude),
-                  }}
-                  title={marker.name}
-                  description={marker.type}
-                  onPress={() =>
-                    setAchievementUnlocked({
-                      ...achievementUnlocked,
-                      show: true,
-                      type: "information",
-                    })
-                  }
-                >
-                  <Callout
-                    onPress={() => {
-                      setShowDirection({
-                        ...showDirection,
-                        show: true,
-                        directionIndex: index,
-                      });
-
-                      setAchievementUnlocked({
-                        ...achievementUnlocked,
-                        show: true,
-                        type: "crosshairs-gps",
-                      });
-                    }}
-                  >
-                    <View style={styles.markerContainer}>
-                      <View style={styles.establishmentHeadlineWrapper}>
-                        <View style={styles.establishmentIcon}>
-                          <Icon
-                            size={16}
-                            name={defineMarkerIcon(marker.type)}
-                            color="#FFF"
-                          />
-                        </View>
-                        <View style={styles.establishmentHeadline}>
-                          <Text style={styles.establishmentName}>
-                            {marker.name}
-                          </Text>
-                          <Text style={styles.establishmentAddress}>
-                            {marker.address}
-                          </Text>
-                        </View>
-                      </View>
-                      <View style={styles.establishmentContactWrapper}>
-                        <View style={styles.establishmentContactInfo}>
-                          <Text style={styles.establishmentContactText}>
-                            <Icon
-                              size={24}
-                              name="cellphone-basic"
-                              color="#9F9B9B"
-                            />{" "}
-                            {marker.contact}
-                          </Text>
-                          <Text style={styles.establishmentContactText}>
-                            <Icon size={24} name="whatsapp" color="#9F9B9B" />{" "}
-                            {marker.contact}
-                          </Text>
-                        </View>
-                        <Pressable style={styles.setDirectionsButtonContainer}>
-                          <Icon size={32} name="directions" color="#EB841A" />
-                          <Text style={styles.setDirectionsButtonText}>
-                            Set directions
-                          </Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  </Callout>
-                </Marker>
-              ))}
-            </MapView>
-          ) : (
-            <View style={styles.loadingLocationComponent}>
-              <Text>
-                {foreignUser
-                  ? "Loading your current location..."
-                  : "Carregando sua localização atual..."}
-              </Text>
-            </View>
-          )}
-        </>
-      )}
-    </View>
-  );
+        
+        <GoogleMaps.View
+          ref={mapRef}
+          cameraPosition={cameraPosition}
+          style={StyleSheet.absoluteFill}
+          markers={locations}
+        />
+      </>
+    );
+  } else {
+    return <Text>Maps are only available on Android and iOS</Text>;
+  }
 }
 
 const styles = StyleSheet.create({
@@ -355,10 +225,10 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   navigationComponent: {
-    zIndex: 3,
+    zIndex: 1,
     width: "80%",
     height: 56,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFF8F0",
     borderRadius: 25,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -366,6 +236,9 @@ const styles = StyleSheet.create({
     bottom: 64,
     alignItems: "center",
     paddingHorizontal: 16,
+    marginInline: "auto",
+    alignSelf: "center",
+    alignContent: "center",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -380,10 +253,10 @@ const styles = StyleSheet.create({
   },
   navigationComponentBrand: {
     fontFamily: "Montserrat_900Black",
-    color: "#EB841A",
+    color: "#C76E16",
   },
   navigationButton: {
-    backgroundColor: "#EB841A",
+    backgroundColor: "#C76E16",
     borderRadius: 100,
     padding: 8,
     position: "relative",
@@ -400,13 +273,13 @@ const styles = StyleSheet.create({
   },
   locationCenterButton: {
     borderRadius: 100,
-    backgroundColor: "#FFF",
+    backgroundColor: "#FFF8F0",
     position: "absolute",
     bottom: 128,
     left: 24,
     width: 40,
     height: 40,
-    zIndex: 2,
+    zIndex: 1,
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({

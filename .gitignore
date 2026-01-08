@@ -31,6 +31,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# build
+/android
+
 # local env files
 .env*.local
 
@@ -39,3 +42,6 @@ yarn-error.*
 
 #environment
 *.env
+
+#windows
+*%

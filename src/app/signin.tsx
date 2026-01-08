@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "expo-router";
 import { useContext, useEffect } from "react";
 import {
   Pressable,
@@ -7,11 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import GitHubIcon from "react-native-vector-icons/FontAwesome";
-import LoadingIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import ErrorIcon from "react-native-vector-icons/MaterialIcons";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -19,16 +15,23 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import GitHubIcon from "@expo/vector-icons/FontAwesome";
+import GoogleIcon from "@expo/vector-icons/FontAwesome";
+import LoadingIcon from "@expo/vector-icons/MaterialCommunityIcons";
+import ErrorIcon from "@expo/vector-icons/MaterialIcons";
 
 import BackgroundImage from "../../assets/background-login-fix.svg";
-import AuthenticationContext from "contexts/authentication";
+import AuthenticationContext from "@contexts/authentication";
+import { env } from "env";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const discovery = {
   authorizationEndpoint: "https://github.com/login/oauth/authorize",
   tokenEndpoint: "https://github.com/login/oauth/access_token",
-  revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_CLIENT_ID}`,
+  revocationEndpoint: `https://github.com/settings/connections/applications/${env.EXPO_PUBLIC_CLIENT_ID}`,
 };
 
 export default function SignInScreen() {
@@ -37,26 +40,28 @@ export default function SignInScreen() {
     showSignInError,
     setShowSignInError,
     isAuthenticating,
+    isUserAuthenticated,
   } = useContext(AuthenticationContext);
   const [request, response, signInWithGithub] = useAuthRequest(
     {
-      clientId: process.env.EXPO_PUBLIC_CLIENT_ID
-        ? process.env.EXPO_PUBLIC_CLIENT_ID
-        : "",
+      clientId: env.EXPO_PUBLIC_CLIENT_ID ? env.EXPO_PUBLIC_CLIENT_ID : "",
       scopes: ["user"],
       redirectUri: makeRedirectUri({
         scheme: "community-cares",
+        // @ts-expect-error: useProxy is not typed in makeRedirectUri options but required for Expo Go
+        useProxy: true,
       }),
     },
     discovery
   );
   const sv = useSharedValue<number>(0);
+  const router = useRouter();
 
   useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-
-      if (code) codeExchange(code);
+      const codeVerifier = request?.codeVerifier;
+      if (code && codeVerifier) codeExchange(code, codeVerifier);
     }
   }, [response]);
 
@@ -69,6 +74,12 @@ export default function SignInScreen() {
       -1 // -1 means infinite loop
     );
   }, []);
+
+  useEffect(() => {
+    if (isUserAuthenticated) {
+      router.navigate("/map");
+    }
+  }, [isUserAuthenticated, router]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${sv.value * 360}deg` }],
@@ -98,7 +109,7 @@ export default function SignInScreen() {
         <BackgroundImage width={"100%"} height={"100%"} />
         <View style={styles.signInContainer}>
           <TouchableOpacity
-            disabled={!request}
+            disabled={isAuthenticating}
             style={styles.signInButton}
             onPress={() => signInWithGithub()}
           >
@@ -113,6 +124,23 @@ export default function SignInScreen() {
               <>
                 <Text style={styles.textSignButton}>Github</Text>
                 <GitHubIcon name="github" size={16} color="#FFFF" />
+              </>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={true}
+            style={[styles.signInButton, { opacity: 0.7 }]}
+            onPress={() => {}}
+          >
+            {isAuthenticating ? (
+              <>
+                <Text style={styles.textSignButton}>Google</Text>
+                <GoogleIcon name="google" size={16} color="#FFFF" />
+              </>
+            ) : (
+              <>
+                <Text style={styles.textSignButton}>Google</Text>
+                <GoogleIcon name="google" size={16} color="#FFFF" />
               </>
             )}
           </TouchableOpacity>

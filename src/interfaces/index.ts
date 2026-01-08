@@ -3,6 +3,8 @@ export interface UsabilityContextProps {
   setShowFilter: (value: boolean) => void;
   foreignUser: boolean;
   setForeignUser: (value: boolean) => void;
+  selectedFilters: string[];
+  setSelectedFilters: (value: string[]) => void;
 }
 
 export type UsabilityProviderProps = {
@@ -14,7 +16,7 @@ export interface AuthenticationContextProps {
   setIsUserAuthenticated(value: boolean): void;
   showSignInError: boolean;
   setShowSignInError(value: boolean): void;
-  codeExchange(value: string): void;
+  codeExchange(code: string, codeVerifier: string): void;
   profileData: UserDataProps | undefined;
   setProfileInfo(value: UserDataProps): void;
   isAuthenticating: boolean;
@@ -82,4 +84,16 @@ export enum AchievementsProps {
 export interface AchievementActionProps {
   show: boolean;
   type: string;
+}
+
+export interface UserAchievementServiceProps {
+  username: string;
+  provider: string;
+  achievements: AchievementsProps;
+}
+
+export interface FrequentlyAskedQuestionProps {
+  questionLabel: string;
+  questionAnswer: string;
+  iconName?: string;
 }

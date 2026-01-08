@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, Easing } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as interfaces from "../interfaces/index";
 import { Platform } from "react-native";
 import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 
-export default function AchievementToastComponent({
+export function AchievementToastComponent({
   achievementDescription,
   iconName,
 }: interfaces.AchievementToastComponentProps) {
