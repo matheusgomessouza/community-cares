@@ -79,7 +79,7 @@ export default function SignInScreen() {
     if (isUserAuthenticated) {
       router.navigate("/map");
     }
-  }, [isUserAuthenticated]);
+  }, [isUserAuthenticated, router]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${sv.value * 360}deg` }],
