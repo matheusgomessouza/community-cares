@@ -54,7 +54,6 @@ export default function SignInScreen() {
     },
     discovery
   );
- 
   const sv = useSharedValue<number>(0);
   const router = useRouter();
 
